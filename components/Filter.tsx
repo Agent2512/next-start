@@ -25,8 +25,8 @@ export type SelectFilter = {
   flexOrder?: number
   key: string
   type: "Select"
-
   title?: string
+
   optionValues: (string | number)[]
   optionTexts: string[]
   defaultValueIndex?: number
@@ -50,8 +50,8 @@ type IncrementFilter = {
   flexOrder?: number
   key: string
   type: "increment"
-
   title?: string
+
   defaultValue: number
   min?:number
   max?:number
