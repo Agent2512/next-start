@@ -1,0 +1,145 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../lib/saf"
+}
+
+datasource db {
+  provider = "sqlserver"
+  url      = env("DATABASE_URL_SAF")
+}
+
+model Backorder {
+  Id      Int       @id(map: "PK_Backorder") @default(autoincrement())
+  OrderId Int?
+  Date    DateTime? @db.DateTime
+  Created DateTime? @db.DateTime
+  Sent    Boolean?
+  Order   Order?    @relation(fields: [OrderId], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "FK_Order_Backorder")
+}
+
+model Customer {
+  Id         Int     @id(map: "PK_Customer") @default(autoincrement())
+  Name       String? @db.NVarChar(100)
+  Company    String? @db.NVarChar(100)
+  Address    String? @db.NVarChar(100)
+  AltAddress String? @db.NVarChar(100)
+  Zip        String? @db.NVarChar(10)
+  City       String? @db.NVarChar(100)
+  Country    String? @db.NVarChar(100)
+  Phone      String? @db.NVarChar(100)
+  Mail       String? @db.NVarChar(360)
+  EAN        String? @db.NVarChar(100)
+  Order      Order[]
+}
+
+model Delivery {
+  Id         Int     @id(map: "PK_Delivery") @default(autoincrement())
+  Name       String? @db.NVarChar(100)
+  Company    String? @db.NVarChar(100)
+  Address    String? @db.NVarChar(100)
+  AltAddress String? @db.NVarChar(100)
+  Zip        String? @db.NVarChar(10)
+  City       String? @db.NVarChar(100)
+  Country    String? @db.NVarChar(100)
+  Phone      String? @db.NVarChar(100)
+  Mail       String? @db.NVarChar(360)
+  EAN        String? @db.NVarChar(100)
+  Order      Order[]
+}
+
+model Error {
+  Id          Int       @id(map: "PK_Error") @default(autoincrement())
+  OrderId     Int?
+  Message     String?   @db.NVarChar(Max)
+  DateCreated DateTime? @db.DateTime
+  Order       Order?    @relation(fields: [OrderId], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "FK_Error_Order")
+}
+
+model Order {
+  Id                               Int            @id(map: "PK_Order") @default(autoincrement())
+  OrderNumber                      Int?
+  Status                           String?        @db.NVarChar(50)
+  StatusUpdate                     DateTime?      @db.DateTime
+  Tracking                         String?        @db.NVarChar(50)
+  TrackingUpdate                   DateTime?      @db.DateTime
+  Invoice                          String?        @db.NVarChar(50)
+  InvoiceUpdate                    DateTime?      @db.Date
+  Satisfaction                     String?        @db.NVarChar(50)
+  SatisfactionUpdate               DateTime?      @db.DateTime
+  DateCreated                      DateTime?      @db.DateTime
+  ShopId                           Int?
+  Webshop                          String?        @db.NVarChar(100)
+  SiteId                           Int?
+  CustomerId                       Int?
+  DeliveryId                       Int?
+  SatisfactionId                   Int?
+  Customer                         Customer?      @relation(fields: [CustomerId], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "FK_Order_Customer")
+  Delivery                         Delivery?      @relation(fields: [DeliveryId], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "FK_Order_Delivery")
+  Satisfaction_OrderToSatisfaction Satisfaction?  @relation(fields: [SatisfactionId], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "FK_Order_Satisfaction")
+  Backorder                        Backorder[]
+  Error                            Error[]
+  OrderProduct                     OrderProduct[]
+
+  @@index([Id, DateCreated])
+}
+
+model OrderProduct {
+  Id              Int      @id(map: "PK_OrderProduct") @default(autoincrement())
+  OrderId         Int?
+  ProductNumber   String?  @db.NVarChar(100)
+  Name            String?  @db.NVarChar(100)
+  Status          String?  @db.NVarChar(100)
+  Quantity        Int?
+  Price           Decimal? @db.Decimal(18, 2)
+  Currency        String?  @db.NVarChar(10)
+  SupplierOrderId String?  @db.NVarChar(100)
+  ToVendor        String?  @db.NVarChar(100)
+  VendorNumber    String?  @db.NVarChar(100)
+  Order           Order?   @relation(fields: [OrderId], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "FK_OrderProduct_Order")
+
+  @@index([Id, OrderId, ProductNumber])
+}
+
+model Satisfaction {
+  Id                   Int       @id(map: "PK_Satisfaction") @default(autoincrement())
+  Score                Int?
+  CreatedDate          DateTime? @db.DateTime
+  Status               String?   @db.NVarChar(50)
+  StatusUpdated        DateTime? @db.DateTime
+  SatisfactionSent     DateTime? @db.DateTime
+  SatisfactionAnswered DateTime? @db.DateTime
+  SatisfactionUpdated  DateTime? @db.DateTime
+  TrustPilotScore      Int?
+  TrustPilotSent       DateTime? @db.DateTime
+  TrustPilotClicked    DateTime? @db.DateTime
+  TrustPilotUpdated    DateTime? @db.DateTime
+  Comment              String?   @db.NVarChar(Max)
+  Order                Order[]
+}
+
+model Tracking {
+  Id                Int       @id(map: "PK_Tracking") @default(autoincrement())
+  OrderId           Int?
+  Tracking          String?   @db.NVarChar(100)
+  Url               String?   @db.NVarChar(200)
+  Reference         String?   @db.NVarChar(100)
+  Status            String?   @db.NVarChar(50)
+  StatusUpdate      DateTime? @db.DateTime
+  ServiceStatusCode String?   @db.NVarChar(60)
+  ServiceStatus     String?   @db.NVarChar(Max)
+  Late              Int
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model Vendor {
+  Id                Int     @default(autoincrement())
+  Name              String? @db.NVarChar(100)
+  ManufacturerId    String? @db.NVarChar(100)
+  Template          String? @db.NVarChar(100)
+  Mail              String? @db.NVarChar(360)
+  Type              String? @db.NVarChar(100)
+  Main              Boolean
+  WarehouseDelivery Boolean
+
+  @@ignore
+}

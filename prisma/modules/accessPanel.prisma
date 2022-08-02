@@ -1,0 +1,24 @@
+model User {
+    id            Int       @id @default(autoincrement())
+    
+    accessPanels AccessPanel[]
+}
+
+model AccessPanel {
+  id    Int    @id @default(autoincrement())
+  panel String @unique
+  url   String
+
+  users User[]
+
+  typeId Int?
+  type AccessPanelType? @relation(fields: [typeId], references: [id], onDelete: SetNull)
+}
+
+model AccessPanelType {
+  id    Int    @id @default(autoincrement())
+  type  String @unique
+  color String
+
+  accessPanels AccessPanel[]
+}

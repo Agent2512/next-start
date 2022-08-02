@@ -1,0 +1,30 @@
+model Feed {
+    id Int @id @default(autoincrement())
+    siteId  Int
+    webShop String
+
+    feedName String
+
+    durationProduct Int @default(5)
+    durationPrice Int @default(5)
+
+    feedUpdate FeedUpdate[]
+
+    @@unique([siteId, webShop])
+}
+
+model FeedUpdate {
+    id Int @id @default(autoincrement())
+
+    feedId Int
+    feed   Feed @relation(fields: [feedId], references: [id], onDelete: Cascade)
+
+    duration Int
+
+    type String
+
+    updateDate DateTime @default(now())
+    updateDone DateTime?
+}
+
+

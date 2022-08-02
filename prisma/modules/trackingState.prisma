@@ -1,0 +1,13 @@
+model trackingState {
+    id    Int    @id
+    state String @default("FOLLOW")
+
+    user User? @relation(fields: [userEmail], references: [email], onDelete: SetNull)
+    userEmail String?
+}
+
+model User {
+    id String @id
+    email         String?   @unique
+    trackings trackingState[]
+}
