@@ -4,6 +4,19 @@ import { PrismaAdapter } from '@next-auth/prisma-adapter';
 import { prismaConnect } from '../../../utils/server/prismaConnect';
 import { hashSync, compareSync } from "bcrypt"
 
+declare module "next-auth" {
+    /**
+     * Returned by `useSession`, `getSession` and received as a prop on the `SessionProvider` React Context
+     */
+    interface Session {
+        user: {
+            name: string | null
+            email: string | null
+            image: string | null
+        }
+    }
+}
+
 
 export default NextAuth({
     providers: [
