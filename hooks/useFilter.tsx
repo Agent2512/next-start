@@ -19,6 +19,8 @@ export const useFilter = (settings: UseFilterSettings) => {
           return { [f.key]: f.defaultValue || "" };
         case "ButtonGroup":
           return { [f.key]: f.buttonValues[f.defaultValueIndex || 0] };
+        case "Date":
+          return { [f.key]: f.defaultValue };
       }
     }),
     A.reduce({}, (acc, f) => {

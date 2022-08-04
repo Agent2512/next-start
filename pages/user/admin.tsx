@@ -1,12 +1,12 @@
-import Layout from '../components/layout'
+import Layout from "../../components/layout"
 
 const index = () => {
- 
+
 
   return (
     <Layout>
       <pre>
-        index
+      user/admin
       </pre>
     </Layout>
   )

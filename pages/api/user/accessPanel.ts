@@ -21,6 +21,11 @@ export default async function accessPanels(req: NextApiRequest, res: NextApiResp
             accessPanels: {
                 include: {
                     type: true,
+                },
+                orderBy: {
+                    type: {
+                        type: "asc",
+                    }
                 }
             }
         }
@@ -32,5 +37,6 @@ export default async function accessPanels(req: NextApiRequest, res: NextApiResp
 
     const accessPanels = user.accessPanels;
 
+    // return res.status(200).json([]);
     return res.status(200).json(accessPanels);
 }

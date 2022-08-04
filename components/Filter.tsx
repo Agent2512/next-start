@@ -2,7 +2,7 @@ import { Button, ButtonGroup, Flex, Input, Select, Text } from '@chakra-ui/react
 import { A, N } from '@mobily/ts-belt';
 import { ChangeEvent, HTMLInputTypeAttribute } from 'react';
 
-export type Filters = SelectFilter | IncrementFilter | InputFilter | ButtonGroupFilter
+export type Filters = SelectFilter | IncrementFilter | InputFilter | ButtonGroupFilter | DateFilter;
 
 export const Filter = ({ filters, change, values }: { filters: Filters[], change: (e: any) => void, values: any }) => {
   return (
@@ -18,6 +18,8 @@ export const Filter = ({ filters, change, values }: { filters: Filters[], change
               return <InputFilter key={f.key} fliter={f} change={change} value={values[f.key]} />
             case "ButtonGroup":
               return <ButtonGroupFilter key={f.key} fliter={f} change={change} value={values[f.key]} />
+            case "Date":
+              return <DateFilter key={f.key} fliter={f} change={change} value={values[f.key]} />
           }
         })
       }
@@ -129,6 +131,26 @@ const ButtonGroupFilter = (props: { fliter: ButtonGroupFilter, change: (e: any) 
           A.mapWithIndex(props.fliter.buttonTexts, (i, v) => <Button key={v} name={props.fliter.key} value={props.fliter.buttonValues[i]} onClick={props.change} colorScheme={props.fliter.buttonValues[i] == props.value ? "green" : ""}  variant={props.fliter.buttonValues[i] == props.value ? "solid" : "outline"}>{v}</Button>)
         }
       </ButtonGroup>
+    </Flex>
+  )
+}
+
+type DateFilter = {
+  flexOrder?: number
+  key: string
+  type: "Date"
+  title?: string
+
+  defaultValue?: string
+}
+
+const DateFilter = (props: { fliter: DateFilter, change: (e: any) => void, value: string }) => {
+
+  return (
+    <Flex alignItems={"center"} gap={1} order={props.fliter.flexOrder}>
+      <Text fontSize={"lg"}>{props.fliter.title || props.fliter.key}</Text>
+      
+      <Input type="date" name={props.fliter.key} value={props.value} onChange={props.change} />
     </Flex>
   )
 }
