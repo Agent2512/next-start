@@ -1,9 +1,11 @@
 import type { AppProps } from 'next/app'
-import { QueryClient, QueryClientProvider, Hydrate } from '@tanstack/react-query'
+import { QueryClient, QueryClientProvider, Hydrate, useQuery, UseQueryOptions } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { ChakraProvider } from '@chakra-ui/react'
 import { SessionProvider, useSession } from "next-auth/react"
 import { useRef, useState } from 'react'
+import { Session } from 'next-auth'
+import { AccessPanel, AccessPanelType } from '../prisma/lib/main'
 
 
 interface Props {
@@ -54,3 +56,4 @@ function Auth({ children }: { children: any }) {
   // If no user, useEffect() will redirect.
   return <div>Loading...</div>
 }
+

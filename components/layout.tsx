@@ -11,7 +11,7 @@ type AccessPanelAndType = AccessPanel & {
     type: AccessPanelType | null;
 };
 
-const getAccessPanels = () => fetch(`/api/user/accessPanel`).then((res) => res.json() as Promise<AccessPanelAndType[]>);
+const getAccessPanels = () => fetch(`/api/user/accessPanels`).then((res) => res.json() as Promise<AccessPanelAndType[]>);
 
 
 interface props {
@@ -34,7 +34,7 @@ const Layout = ({ children }: props) => {
 
 
 
-            <GridItem>
+            <GridItem p={2}>
                 {children}
             </GridItem>
         </Grid>
@@ -45,8 +45,7 @@ export default Layout;
 
 const TopNavbar = () => {
     const router = useRouter()
-    const { data: accessPanel, isSuccess } = useQuery(["accessPanels"], {
-        queryFn: getAccessPanels,
+    const { data: accessPanel, isSuccess } = useQuery(["accessPanels"], getAccessPanels, {
         select(data) {
             const path = router.pathname.slice(1);
             const panel = data.find((p) => p.url === path);
@@ -54,7 +53,6 @@ const TopNavbar = () => {
             temp.url = ""
             return panel || temp;
         },
-        
     });
 
     return (
