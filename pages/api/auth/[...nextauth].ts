@@ -60,7 +60,22 @@ export default NextAuth({
     },
     debug: process.env.NODE_ENV === 'development',
     adapter: PrismaAdapter(prismaConnect),
-    
+    callbacks: {
+        async session({ session }) {
+            if (session.user.email) {
+                const user = await getUser(session.user.email)
+                
+                if (user) {
+                    session.user.name = user.name
+                    session.user.image = user.image
+                    session.user.email = user.email
+                }
+            }
+            
+
+            return session
+        },
+    }
 })
 
 const createUser = (email: string, password: string) => {

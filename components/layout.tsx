@@ -11,7 +11,7 @@ type AccessPanelAndType = AccessPanel & {
     type: AccessPanelType | null;
 };
 
-const getAccessPanels = () => fetch(`/api/user/accessPanels`).then((res) => res.json() as Promise<AccessPanelAndType[]>);
+const getAccessPanels = () => fetch(`/api/user/userAccessPanels`).then((res) => res.json() as Promise<AccessPanelAndType[]>);
 
 
 interface props {
@@ -45,7 +45,7 @@ export default Layout;
 
 const TopNavbar = () => {
     const router = useRouter()
-    const { data: accessPanel, isSuccess } = useQuery(["accessPanels"], getAccessPanels, {
+    const { data: accessPanel, isSuccess } = useQuery(["userAccessPanels"], getAccessPanels, {
         select(data) {
             const path = router.pathname.slice(1);
             const panel = data.find((p) => p.url === path);
@@ -78,7 +78,7 @@ const TopNavbar = () => {
 
 
 const SideNavber = () => {
-    const { data: accessPanels, isSuccess } = useQuery(["accessPanels"], getAccessPanels);
+    const { data: accessPanels, isSuccess } = useQuery(["userAccessPanels"], getAccessPanels);
 
     return (
         <>

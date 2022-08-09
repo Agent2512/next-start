@@ -6,11 +6,11 @@ import { prismaConnect } from "../../../utils/server/prismaConnect";
 
 const secret = process.env.NEXT_AUTH_JWT_SECRET
 
-export default async function accessPanels(req: NextApiRequest, res: NextApiResponse) {
+export default async function userAccessPanels(req: NextApiRequest, res: NextApiResponse) {
     const token = await getToken({ req, secret })
 
     if (token === null || token.email === null) {
-        return res.status(401).json({ message: "Unauthorized" });
+        return res.status(401).json([]);
     }
 
     const user = await prismaConnect.user.findUnique({
@@ -32,7 +32,7 @@ export default async function accessPanels(req: NextApiRequest, res: NextApiResp
     })
 
     if (user == null) {
-        return res.status(401).json({ message: "Not logged in" });
+        return res.status(401).json([]);
     }
 
     const accessPanels = user.accessPanels;
