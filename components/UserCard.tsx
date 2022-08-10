@@ -40,18 +40,18 @@ const UserCardInfo = (props: { user: Session["user"] | undefined; isSuccess: boo
     const [editMode, setEditMode] = useState(false);
     const [eidtData, setEditData] = useState({ username: "", email: "" });
     const queryClient = useQueryClient();
-    const { mutate } = useMutation(sendUserUpdate, {
-        onSuccess: () => {
-            queryClient.refetchQueries(["session"]);
-            setEditMode(false)
-        }
-    });
+    const { mutate } = useMutation(sendUserUpdate);
 
     const handleEdit = () => {
         if (eidtData.email && eidtData.username) {
             const { username, email } = eidtData;
 
-            mutate({ username, email });
+            mutate({ username, email }, {
+                onSuccess: () => {
+                    queryClient.refetchQueries(["session"]);
+                    setEditMode(false)
+                }
+            });
         }
     }
 

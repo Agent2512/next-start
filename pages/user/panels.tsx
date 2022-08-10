@@ -1,6 +1,6 @@
 import { Button, Flex, Heading, IconButton, Input, InputGroup, InputLeftAddon, Select, Text } from "@chakra-ui/react";
 import { A } from "@mobily/ts-belt";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChangeEvent, useState } from "react";
 import Layout from "../../components/layout";
 import { useApi } from "../../hooks/useApi";
@@ -36,27 +36,33 @@ export default PanelsAdmin;
 
 
 const PanelCard = ({ panel }: { panel: allAccessPanelsResponse }) => {
-    const { get } = useApi("/api/user/")
+    const { get, post } = useApi("/api/user/")
     const { data: panelTypes, isSuccess } = useQuery(["panelTypes"], () => get<allAccessPanelTypesResponse[]>("allAccessPanelTypes"))
     const [edit, setEdit] = useState(false)
     const [editData, setEditData] = useState(panel);
+    const queryClient = useQueryClient();
+    const { mutate } = useMutation(() => post<allAccessPanelsResponse>("options/updateAccessPanel", editData))
 
     const handleChange = (e: ChangeEvent<HTMLInputElement & HTMLSelectElement>) => {
         const { name, value } = e.target;
 
         if (name === "type" && isSuccess) {
-            
+
             setEditData(pre => {
                 const newType = A.find(panelTypes, p => p.type === value)
 
                 if (newType) {
-                    return { ...pre, type: newType }
+                    return {
+                        ...pre,
+                        type: newType,
+                        typeId: newType.id
+                    }
                 }
 
                 return pre
             })
-            
-        } 
+
+        }
         else {
             setEditData({ ...editData, [name]: value })
         }
@@ -72,7 +78,14 @@ const PanelCard = ({ panel }: { panel: allAccessPanelsResponse }) => {
     }
 
     const handleSubmit = () => {
-        console.log("submit")
+        mutate(undefined, {
+            onSuccess: () => {
+                queryClient.refetchQueries(["panels"])
+                queryClient.refetchQueries(["panelTypes"])
+                queryClient.refetchQueries(["userAccessPanels"])
+                setEdit(false)
+            }
+        })
     }
 
     if (edit) {
@@ -81,18 +94,18 @@ const PanelCard = ({ panel }: { panel: allAccessPanelsResponse }) => {
                 <Flex p={2} gap={.5} minW={"32"} flexDir={"column"} alignItems={"center"} textColor="white" >
                     <InputGroup borderColor={"black"}>
                         <InputLeftAddon bg={"black"} children='Panel' />
-                        <Input type='text' name={"panel"} value={editData.panel} onChange={handleChange}/>
+                        <Input type='text' name={"panel"} value={editData.panel} onChange={handleChange} />
                     </InputGroup>
 
                     <InputGroup borderColor={"black"}>
                         <InputLeftAddon bg={"black"} children='Url' />
-                        <Input type='text' name={"url"} value={editData.url} onChange={handleChange}/>
+                        <Input type='text' name={"url"} value={editData.url} onChange={handleChange} />
                     </InputGroup>
 
                     <InputGroup borderColor={"black"}>
                         <InputLeftAddon bg={"black"} children='Type' />
                         <Select borderTopLeftRadius={0} borderBottomLeftRadius={0} borderColor={"black"} defaultValue={editData.type?.type} name={"type"} onChange={handleChange}>
-                            {isSuccess && A.map(panelTypes, p => <option key={p.id} value={p.type} style={{ backgroundColor: p.color }}>{p.type}</option>)}
+                            {isSuccess && A.map(panelTypes, p => <option key={p.id} value={p.type} style={{ backgroundColor: p.color }} >{p.type}</option>)}
                         </Select>
                     </InputGroup>
                 </Flex>

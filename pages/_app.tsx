@@ -1,11 +1,11 @@
 import type { AppProps } from 'next/app'
-import { QueryClient, QueryClientProvider, Hydrate, useQuery, UseQueryOptions } from '@tanstack/react-query'
+import { QueryClient, QueryClientProvider, Hydrate, useQuery } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { ChakraProvider } from '@chakra-ui/react'
-import { SessionProvider, useSession } from "next-auth/react"
-import { useRef, useState } from 'react'
-import { Session } from 'next-auth'
-import { AccessPanel, AccessPanelType } from '../prisma/lib/main'
+import { SessionProvider, signIn } from "next-auth/react"
+import { useState } from 'react'
+import type { Session } from 'next-auth'
+import { D } from '@mobily/ts-belt'
 
 
 interface Props {
@@ -15,7 +15,6 @@ interface Props {
 }
 
 function MyApp({ Component, pageProps }: AppProps & Props) {
-  // const queryClient = useRef(new QueryClient())
   const [queryClient] = useState(() => new QueryClient())
 
   return (
@@ -44,11 +43,16 @@ function MyApp({ Component, pageProps }: AppProps & Props) {
 
 export default MyApp
 
+const getSession = () => fetch('/api/auth/session').then(res => (res.json() as Promise<Session>));
 
 function Auth({ children }: { children: any }) {
-  const { data } = useSession({ required: true })
+  const { data, isSuccess } = useQuery(["session"], getSession, {
+    onSuccess(data) {
+      if (D.isEmpty(data)) signIn()
+    },
+  });
 
-  if (data) {
+  if (isSuccess && D.isNotEmpty(data)) {
     return children
   }
 
