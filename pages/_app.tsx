@@ -6,6 +6,7 @@ import { SessionProvider, signIn } from "next-auth/react"
 import { useState } from 'react'
 import type { Session } from 'next-auth'
 import { D } from '@mobily/ts-belt'
+import { useApi } from '../hooks/useApi'
 
 
 interface Props {
@@ -43,10 +44,11 @@ function MyApp({ Component, pageProps }: AppProps & Props) {
 
 export default MyApp
 
-const getSession = () => fetch('/api/auth/session').then(res => (res.json() as Promise<Session>));
 
 function Auth({ children }: { children: any }) {
-  const { data, isSuccess } = useQuery(["session"], getSession, {
+  const { get } = useApi("/api/auth/")
+  const { data, isSuccess } = useQuery(["session"], () => get<Session>("session"), {
+    refetchInterval: 1000 * 60 * 5,
     onSuccess(data) {
       if (D.isEmpty(data)) signIn()
     },

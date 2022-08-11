@@ -7,19 +7,18 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    
     "db-format": "prismix && prisma format",
     "db-push": "prismix && prisma format && prisma db push",
     "db-gen": "prismix && prisma format && prisma generate",
     "db-all": "prismix && prisma format && prisma generate && prisma db push",
     "db-web": "prisma studio",
     "db-pull": "prisma db pull",
-
     "db-saf-pull": "prisma db pull --schema=./prisma/db/saf.prisma",
     "db-saf-gen": "prisma generate --schema=./prisma/db/saf.prisma",
     "db-saf-web": "prisma studio --schema=./prisma/db/saf.prisma"
   },
   "dependencies": {
+    "@chakra-ui/icons": "^2.0.6",
     "@chakra-ui/react": "^2.2.4",
     "@emotion/react": "^11.9.3",
     "@emotion/styled": "^11.9.3",
@@ -33,6 +32,7 @@
     "@types/bcrypt": "^5.0.0",
     "@types/pdfmake": "^0.2.1",
     "bcrypt": "^5.0.1",
+    "color-shorthand-hex-to-six-digit": "^4.0.14",
     "dayjs": "^1.11.4",
     "framer-motion": "^6.5.1",
     "next": "12.2.3",
