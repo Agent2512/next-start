@@ -1,4 +1,4 @@
-import { Flex, InputGroup, InputLeftAddon, Input, Button, Text } from "@chakra-ui/react";
+import { Flex, InputGroup, InputLeftAddon, Input, Button, Text, useColorMode } from "@chakra-ui/react";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { conv } from "color-shorthand-hex-to-six-digit";
 import { useState, ChangeEvent } from "react";
@@ -6,6 +6,7 @@ import { useApi } from "../../hooks/useApi";
 import { allAccessPanelTypesResponse } from "../../pages/api/user/allAccessPanelTypes";
 
 export const PanelTypeCard = ({ panelType }: {panelType: allAccessPanelTypesResponse}) => {
+    const { colorMode } = useColorMode();
     const { post } = useApi("/api/user/")
     const [edit, setEdit] = useState(false)
     const [editData, setEditData] = useState(panelType);
@@ -48,15 +49,15 @@ export const PanelTypeCard = ({ panelType }: {panelType: allAccessPanelTypesResp
 
     if (edit) {
         return (
-            <Flex flexDir={"column"} alignItems={"center"} justifyContent={"space-between"} borderColor={"black"} borderStyle={"solid"} borderWidth={1} borderRadius={"md"} bgGradient={`linear(to-t, ${editData.color} 55%, black)`}>
+            <Flex flexDir={"column"} alignItems={"center"} justifyContent={"space-between"} borderColor={colorMode == "light" ? "black" : "white"} borderStyle={"solid"} borderWidth={1} borderRadius={"md"} bgGradient={`linear(to-t, ${editData.color} 55%, black)`}>
                 <Flex p={2} gap={.5} minW={"32"} flexDir={"column"} alignItems={"center"} textColor="white">
-                    <InputGroup borderColor={"black"}>
-                        <InputLeftAddon bg={"black"} children='Type' />
+                    <InputGroup borderColor={colorMode == "light" ? "black" : "white"}>
+                        <InputLeftAddon bg={"black"}>Type</InputLeftAddon>
                         <Input type='text' name={"type"} value={editData.type} onChange={handleChange} />
                     </InputGroup>
 
-                    <InputGroup borderColor={"black"}>
-                        <InputLeftAddon bg={"black"} children='Color' />
+                    <InputGroup borderColor={colorMode == "light" ? "black" : "white"}>
+                        <InputLeftAddon bg={"black"}>Color</InputLeftAddon>
                         <Input type='text' name={"color"} value={editData.color} onChange={handleChange} />
                     </InputGroup>
                 </Flex>
@@ -69,7 +70,7 @@ export const PanelTypeCard = ({ panelType }: {panelType: allAccessPanelTypesResp
     }
 
     return (
-        <Flex flexDir={"column"} alignItems={"center"} justifyContent={"space-between"} borderColor={"black"} borderStyle={"solid"} borderWidth={1} borderRadius={"md"} bgGradient={`linear(to-t, ${panelType.color} 55%, black)`}>
+        <Flex flexDir={"column"} alignItems={"center"} justifyContent={"space-between"} borderColor={colorMode == "light" ? "black" : "white"} borderStyle={"solid"} borderWidth={1} borderRadius={"md"} bgGradient={`linear(to-t, ${panelType.color} 55%, black)`}>
             <Flex p={2} minW={"32"} flexDir={"column"} alignItems={"center"} textColor="white">
                 <Text textTransform={"capitalize"}>{panelType.type}</Text>
                 <Text>Panels: {panelType.accessPanels.length}</Text>

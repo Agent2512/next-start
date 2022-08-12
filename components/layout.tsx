@@ -1,4 +1,4 @@
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, Button, Grid, GridItem, Text, VStack } from "@chakra-ui/react";
+import { Box, Breadcrumb, BreadcrumbItem, BreadcrumbLink, Button, Grid, GridItem, Text, useColorMode, useColorModePreference, useTheme, VStack } from "@chakra-ui/react";
 import { A, D } from "@mobily/ts-belt";
 import { useQuery } from "@tanstack/react-query";
 import { signIn } from "next-auth/react";
@@ -6,6 +6,8 @@ import { ReactNode } from "react";
 import { AccessPanel, AccessPanelType } from "../prisma/lib/main";
 import Link from 'next/link';
 import router, { useRouter } from "next/router";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { useLocalStorage } from "../hooks/useLocalStorage";
 
 type AccessPanelAndType = AccessPanel & {
     type: AccessPanelType | null;
@@ -19,16 +21,15 @@ interface props {
 }
 
 const Layout = ({ children }: props) => {
-
-
+    const { colorMode } = useColorMode()
 
     return (
-        <Grid h="100vh" templateRows="auto 1fr" templateColumns="auto 1fr">
-            <GridItem rowSpan={2} borderColor={"black"} borderStyle={"solid"} borderRightWidth={2}>
+        <Grid h="100vh" templateRows="auto 1fr" templateColumns="auto 1fr" >
+            <GridItem rowSpan={2} borderColor={colorMode == "light" ? "black" : "white"} borderStyle={"solid"} borderRightWidth={2} >
                 <SideNavber />
             </GridItem>
 
-            <GridItem borderColor={"black"} borderStyle={"solid"} borderBottomWidth={2}>
+            <GridItem borderColor={colorMode == "light" ? "black" : "white"} borderStyle={"solid"} borderBottomWidth={2}>
                 <TopNavbar />
             </GridItem>
 
@@ -79,12 +80,13 @@ const TopNavbar = () => {
 
 const SideNavber = () => {
     const { data: accessPanels, isSuccess } = useQuery(["userAccessPanels"], getAccessPanels);
+    const [Animate] = useAutoAnimate<HTMLDivElement>()
 
     return (
         <>
             <Text fontSize={"2xl"} textAlign={"center"} textTransform={"capitalize"}>manu</Text>
 
-            <VStack justifyContent={"center"} mt={2} spacing={2} px={4}>
+            <VStack ref={Animate} justifyContent={"center"} mt={2} spacing={2} px={4}>
                 <Link href='/' key='/' passHref>
                     <Button as='a' h={"auto"} w={"full"} py={2} flexDir="column" textColor="white" textTransform={"capitalize"} bgGradient={`linear(to-t, gray.500, black)`}>
                         Dashboard

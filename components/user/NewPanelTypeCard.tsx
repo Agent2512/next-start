@@ -1,10 +1,11 @@
-import { Flex, InputGroup, InputLeftAddon, Input, Button } from "@chakra-ui/react";
+import { Flex, InputGroup, InputLeftAddon, Input, Button, useColorMode } from "@chakra-ui/react";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { useState, ChangeEvent } from "react";
 import { useApi } from "../../hooks/useApi";
 import { allAccessPanelTypesResponse } from "../../pages/api/user/allAccessPanelTypes";
 
 export const NewPanelTypeCard = ({ panelType }: { panelType: allAccessPanelTypesResponse }) => {
+    const { colorMode } = useColorMode();
     const { post } = useApi("/api/user/")
     const [data, setData] = useState(panelType);
     const queryClient = useQueryClient();
@@ -38,15 +39,15 @@ export const NewPanelTypeCard = ({ panelType }: { panelType: allAccessPanelTypes
     }
 
     return (
-        <Flex flexDir={"column"} alignItems={"center"} justifyContent={"space-between"} borderColor={"black"} borderStyle={"solid"} borderWidth={1} borderRadius={"md"} bgGradient={`linear(to-t, ${data.color} 55%, black)`}>
+        <Flex flexDir={"column"} alignItems={"center"} justifyContent={"space-between"} borderColor={colorMode == "light" ? "black" : "white"} borderStyle={"solid"} borderWidth={1} borderRadius={"md"} bgGradient={`linear(to-t, ${data.color} 55%, black)`}>
             <Flex p={2} gap={.5} minW={"32"} flexDir={"column"} alignItems={"center"} textColor="white">
-                <InputGroup borderColor={"black"}>
-                    <InputLeftAddon bg={"black"} children='Type' />
+                <InputGroup borderColor={colorMode == "light" ? "black" : "white"}>
+                    <InputLeftAddon bg={"black"}>Type</InputLeftAddon>
                     <Input type='text' name={"type"} value={data.type} onChange={handleChange} />
                 </InputGroup>
 
-                <InputGroup borderColor={"black"}>
-                    <InputLeftAddon bg={"black"} children='Color' />
+                <InputGroup borderColor={colorMode == "light" ? "black" : "white"}>
+                    <InputLeftAddon bg={"black"}>Color</InputLeftAddon>
                     <Input type='text' name={"color"} value={data.color} onChange={handleChange} />
                 </InputGroup>
             </Flex>

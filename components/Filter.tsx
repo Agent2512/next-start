@@ -1,12 +1,14 @@
-import { Button, ButtonGroup, Flex, Input, Select, Text } from '@chakra-ui/react';
+import { Button, ButtonGroup, Flex, Input, Select, Text, useColorMode } from '@chakra-ui/react';
 import { A, N } from '@mobily/ts-belt';
 import { ChangeEvent, HTMLInputTypeAttribute } from 'react';
 
 export type Filters = SelectFilter | IncrementFilter | InputFilter | ButtonGroupFilter | DateFilter;
 
 export const Filter = ({ filters, change, values }: { filters: Filters[], change: (e: any) => void, values: any }) => {
+  const { colorMode } = useColorMode()
+  
   return (
-    <Flex borderColor={"black"} borderStyle={"solid"} borderWidth={2} borderRadius={"md"} p={2} gap={2} justifyContent="center">
+    <Flex borderColor={colorMode == "light" ? "black" : "white"} borderWidth={2} borderRadius={"md"} p={2} gap={2}>
       {
         A.keepMap(filters, f => {
           switch (f.type) {
@@ -128,7 +130,7 @@ const ButtonGroupFilter = (props: { fliter: ButtonGroupFilter, change: (e: any) 
 
       <ButtonGroup isAttached>
         {
-          A.mapWithIndex(props.fliter.buttonTexts, (i, v) => <Button key={v} name={props.fliter.key} value={props.fliter.buttonValues[i]} onClick={props.change} colorScheme={props.fliter.buttonValues[i] == props.value ? "green" : ""}  variant={props.fliter.buttonValues[i] == props.value ? "solid" : "outline"}>{v}</Button>)
+          A.mapWithIndex(props.fliter.buttonTexts, (i, v) => <Button key={v} name={props.fliter.key} value={props.fliter.buttonValues[i]} onClick={props.change} colorScheme={props.fliter.buttonValues[i] == props.value ? "green" : ""} variant={props.fliter.buttonValues[i] == props.value ? "solid" : "outline"}>{v}</Button>)
         }
       </ButtonGroup>
     </Flex>
@@ -149,7 +151,7 @@ const DateFilter = (props: { fliter: DateFilter, change: (e: any) => void, value
   return (
     <Flex alignItems={"center"} gap={1} order={props.fliter.flexOrder}>
       <Text fontSize={"lg"}>{props.fliter.title || props.fliter.key}</Text>
-      
+
       <Input type="date" name={props.fliter.key} value={props.value} onChange={props.change} />
     </Flex>
   )

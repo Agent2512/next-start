@@ -27,12 +27,15 @@ export const useFilter = (settings: UseFilterSettings) => {
       return D.merge(acc, f);
     })
   );
-  const [values, setValue] = useState(initialState);
+
+  type Tkeys = typeof settings.filters[number]["key"];
+  type TValues = { [key in Tkeys]: any };
+  const [values, setValue] = useState<TValues>(initialState);
 
 
   const changeValue = (e: ChangeEvent<any>) => {
     const name = e.currentTarget.name;
-    const value = e.currentTarget.value || e.currentTarget.checked;
+    const value = e.currentTarget.value;
 
     setValue(pre => {
       return {

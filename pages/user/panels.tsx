@@ -1,4 +1,4 @@
-import { Button, Flex, Heading, IconButton, Input, InputGroup, InputLeftAddon, Select, Text } from "@chakra-ui/react";
+import { Button, Flex, Heading, IconButton, Input, InputGroup, InputLeftAddon, Select, Text, useColorMode } from "@chakra-ui/react";
 import { A } from "@mobily/ts-belt";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChangeEvent, useState } from "react";
@@ -14,6 +14,7 @@ import { NewPanelTypeCard } from "../../components/user/NewPanelTypeCard";
 import { useAutoAnimate } from '@formkit/auto-animate/react'
 
 const PanelsAdmin = () => {
+    const { colorMode } = useColorMode();
     const { get } = useApi("/api/user/")
     const queryClient = useQueryClient();
     const { data: panels, isSuccess: panelsIsSuccess } = useQuery(["panels"], () => get<allAccessPanelsResponse[]>("allAccessPanels"))
@@ -31,7 +32,7 @@ const PanelsAdmin = () => {
     const newPanel = () => {
         queryClient.setQueriesData<allAccessPanelsResponse[]>(["newPanels"], () => {
             const newP: allAccessPanelsResponse = {
-                id: newPanels.length + 1,
+                id: -newPanels.length - 1,
                 panel: "",
                 url: "",
                 users: [],
@@ -53,7 +54,7 @@ const PanelsAdmin = () => {
     const newPanelType = () => {
         queryClient.setQueriesData<allAccessPanelTypesResponse[]>(["newPanelTypes"], () => {
             const newPT: allAccessPanelTypesResponse = {
-                id: newPanelTypes.length + 1,
+                id: -newPanelTypes.length - 1,
                 type: "",
                 color: "#000",
                 accessPanels: [],
@@ -68,23 +69,23 @@ const PanelsAdmin = () => {
 
     return (
         <Layout>
-            <Flex flexDir={"column"} borderColor={"black"} borderStyle={"solid"} borderWidth={1} borderRadius={"md"}>
+            <Flex flexDir={"column"} borderColor={colorMode == "light" ? "black" : "white"} borderStyle={"solid"} borderWidth={1} borderRadius={"md"}>
                 <Flex alignItems={"center"} gap={2}>
                     <Heading ml={2} mb={1} textTransform="capitalize">access panels</Heading>
                     <IconButton onClick={newPanel} colorScheme="green" aria-label="add new panel Type" icon={<AddIcon />} />
                 </Flex>
-                <Flex ref={Animate} p={2} gap={2} borderColor={"black"} borderStyle={"solid"} borderTopWidth={1} wrap={"wrap"}>
+                <Flex ref={Animate} p={2} gap={2} borderColor={colorMode == "light" ? "black" : "white"} borderStyle={"solid"} borderTopWidth={1} wrap={"wrap"}>
                     {panelsIsSuccess && A.map(panels, p => <PanelCard key={p.id} panel={p} />)}
                     {A.map(newPanels, p => <NewPanelCard key={p.id} panel={p} />)}
                 </Flex>
             </Flex>
 
-            <Flex flexDir={"column"} borderColor={"black"} borderStyle={"solid"} borderWidth={1} borderRadius={"md"} mt={2}>
+            <Flex flexDir={"column"} borderColor={colorMode == "light" ? "black" : "white"} borderStyle={"solid"} borderWidth={1} borderRadius={"md"} mt={2}>
                 <Flex alignItems={"center"} gap={2}>
                     <Heading ml={2} mb={1} textTransform="capitalize">access panel types</Heading>
                     <IconButton onClick={newPanelType} colorScheme="green" aria-label="add new panel Type" icon={<AddIcon />} />
                 </Flex>
-                <Flex ref={Animate} p={2} gap={2} borderColor={"black"} borderStyle={"solid"} borderTopWidth={1} wrap={"wrap"}>
+                <Flex ref={Animate} p={2} gap={2} borderColor={colorMode == "light" ? "black" : "white"} borderStyle={"solid"} borderTopWidth={1} wrap={"wrap"}>
                     {panelTypesIsSuccess && A.map(panelTypes, p => <PanelTypeCard key={p.id} panelType={p} />)}
                     {A.map(newPanelTypes, p => <NewPanelTypeCard key={p.id} panelType={p} />)}
                 </Flex>

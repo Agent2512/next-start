@@ -1,4 +1,4 @@
-import { Flex, InputGroup, InputLeftAddon, Input, Select, Button, Text } from "@chakra-ui/react";
+import { Flex, InputGroup, InputLeftAddon, Input, Select, Button, Text, useColorMode } from "@chakra-ui/react";
 import { A } from "@mobily/ts-belt";
 import { useQueryClient, useMutation, useQuery } from "@tanstack/react-query";
 import { useState, ChangeEvent } from "react";
@@ -7,6 +7,7 @@ import { allAccessPanelsResponse } from "../../pages/api/user/allAccessPanels";
 import { allAccessPanelTypesResponse } from "../../pages/api/user/allAccessPanelTypes";
 
 export const PanelCard = ({ panel }: { panel: allAccessPanelsResponse; }) => {
+    const { colorMode } = useColorMode();
     const { get, post } = useApi("/api/user/");
     const [edit, setEdit] = useState(false);
     const [editData, setEditData] = useState(panel);
@@ -70,21 +71,21 @@ export const PanelCard = ({ panel }: { panel: allAccessPanelsResponse; }) => {
 
     if (edit) {
         return (
-            <Flex flexDir={"column"} alignItems={"center"} justifyContent={"space-between"} borderColor={"black"} borderStyle={"solid"} borderWidth={1} borderRadius={"md"} bgGradient={`linear(to-t, ${editData.type ? editData.type.color : "#000"} 50%, black)`}>
+            <Flex flexDir={"column"} alignItems={"center"} justifyContent={"space-between"} borderColor={colorMode == "light" ? "black" : "white"} borderStyle={"solid"} borderWidth={1} borderRadius={"md"} bgGradient={`linear(to-t, ${editData.type ? editData.type.color : "#000"} 50%, black)`}>
                 <Flex p={2} gap={.5} minW={"32"} flexDir={"column"} alignItems={"center"} textColor="white">
-                    <InputGroup borderColor={"black"}>
-                        <InputLeftAddon bg={"black"} children='Panel' />
+                    <InputGroup borderColor={colorMode == "light" ? "black" : "white"}>
+                        <InputLeftAddon bg={"black"}>Panel</InputLeftAddon>
                         <Input type='text' name={"panel"} value={editData.panel} onChange={handleChange} />
                     </InputGroup>
 
-                    <InputGroup borderColor={"black"}>
-                        <InputLeftAddon bg={"black"} children='Url' />
+                    <InputGroup borderColor={colorMode == "light" ? "black" : "white"}>
+                        <InputLeftAddon bg={"black"}>Url</InputLeftAddon>
                         <Input type='text' name={"url"} value={editData.url} onChange={handleChange} />
                     </InputGroup>
 
-                    <InputGroup borderColor={"black"}>
-                        <InputLeftAddon bg={"black"} children='Type' />
-                        <Select borderTopLeftRadius={0} borderBottomLeftRadius={0} borderColor={"black"} defaultValue={editData.type?.type} name={"type"} onChange={handleChange}>
+                    <InputGroup borderColor={colorMode == "light" ? "black" : "white"}>
+                        <InputLeftAddon bg={"black"}>Type</InputLeftAddon>
+                        <Select borderTopLeftRadius={0} borderBottomLeftRadius={0} borderColor={colorMode == "light" ? "black" : "white"} defaultValue={editData.type?.type} name={"type"} onChange={handleChange}>
                             {isSuccess && A.map(panelTypes, p => <option key={p.id} value={p.type} style={{ backgroundColor: p.color }}>{p.type}</option>)}
                         </Select>
                     </InputGroup>
@@ -98,7 +99,7 @@ export const PanelCard = ({ panel }: { panel: allAccessPanelsResponse; }) => {
     }
 
     return (
-        <Flex flexDir={"column"} alignItems={"center"} justifyContent={"space-between"} borderColor={"black"} borderStyle={"solid"} borderWidth={1} borderRadius={"md"} bgGradient={`linear(to-t, ${panel.type ? panel.type.color : "#000"} 50%, black)`}>
+        <Flex flexDir={"column"} alignItems={"center"} justifyContent={"space-between"} borderColor={colorMode == "light" ? "black" : "white"} borderStyle={"solid"} borderWidth={1} borderRadius={"md"} bgGradient={`linear(to-t, ${panel.type ? panel.type.color : "#000"} 50%, black)`}>
             <Flex p={2} minW={"32"} flexDir={"column"} alignItems={"center"} textColor="white">
                 <Text textTransform={"capitalize"}>{panel.panel.replace("\\n", " ")}</Text>
                 <Text>Url: {panel.url}</Text>
