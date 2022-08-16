@@ -1,0 +1,44 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../lib/common"
+}
+
+datasource db {
+  provider = "sqlserver"
+  url      = env("DATABASE_URL_COMMON")
+}
+
+model country {
+  id              Int               @id(map: "PK__country__3213E83FBBA8BBC6") @default(autoincrement())
+  name            String            @unique(map: "UQ__country__72E12F1BF20D4516") @db.NVarChar(100)
+  localname       String            @unique(map: "UQ__country__7B269E3D580FA3F7") @db.NVarChar(100)
+  danishname      String            @unique(map: "UQ__country__1BE48BC04D98217B") @db.NVarChar(100)
+  language        String            @db.NVarChar(100)
+  locallanguage   String            @db.NVarChar(100)
+  danishlanguage  String            @db.NVarChar(100)
+  identifier      String            @unique(map: "UQ__country__D112ED48488CD9D6") @db.NVarChar(10)
+  currencyid      Int?
+  vat             Decimal           @db.Decimal(9, 2)
+  currency        currency?         @relation(fields: [currencyid], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK__country__currenc__76619304")
+  siteinformation siteinformation[]
+}
+
+model currency {
+  id           Int       @id(map: "PK__currency__3213E83FDF6CD31F") @default(autoincrement())
+  iso          Int       @unique(map: "UQ__currency__DC509075C07DE079")
+  symbol       String    @db.NVarChar(30)
+  currencycode String    @db.NVarChar(10)
+  country      country[]
+}
+
+model siteinformation {
+  id        Int      @id(map: "PK__siteinfo__3213E83FF979A99E") @default(autoincrement())
+  backend   String   @db.NVarChar(10)
+  backendid Int
+  website   String   @db.NVarChar(100)
+  siteid    Int
+  active    Boolean?
+  name      String?  @db.NVarChar(100)
+  countryid Int?
+  country   country? @relation(fields: [countryid], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK__siteinfor__count__0D44F85C")
+}

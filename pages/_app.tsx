@@ -21,7 +21,7 @@ function MyApp({ Component, pageProps }: AppProps & Props) {
   return (
     <QueryClientProvider client={queryClient} contextSharing={true}>
       <Hydrate state={pageProps.dehydratedState}>
-        <SessionProvider session={pageProps.session} refetchOnWindowFocus>
+        <SessionProvider session={pageProps.session}>
           <ChakraProvider>
 
 

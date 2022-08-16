@@ -42,8 +42,8 @@ export const NewPanelCard = ({ panel }: { panel: allAccessPanelsResponse; }) => 
     const handleSave = () => {
         savePanel(undefined, {
             onSuccess: () => {
-                queryClient.refetchQueries(["panels"]);
-                queryClient.refetchQueries(["panelTypes"]);
+                queryClient.invalidateQueries(["panels"]);
+                queryClient.invalidateQueries(["panelTypes"]);
                 
                 handleCancel()
             }

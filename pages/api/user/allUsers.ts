@@ -26,6 +26,6 @@ export default async function allUsers(req: NextApiRequest, res: NextApiResponse
 export type AllUsersResponse = {
     accessPanels: (AccessPanel & { type: AccessPanelType | null; })[];
     id: string;
-    email: string | null;
-    name: string | null;
+    email: string;
+    name: string;
 }

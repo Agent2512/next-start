@@ -1,9 +1,11 @@
+import { FlexboxProps } from '@chakra-ui/react';
 import { A, D, pipe } from '@mobily/ts-belt';
 import { ChangeEvent, useState } from 'react';
 import { Filter, Filters } from '../components/Filter';
 
 export type UseFilterSettings = {
-  filters: Filters[]
+  filters: Filters[],
+  justifyContent?: FlexboxProps["justifyContent"]
 }
 
 export const useFilter = (settings: UseFilterSettings) => {
@@ -21,6 +23,8 @@ export const useFilter = (settings: UseFilterSettings) => {
           return { [f.key]: f.buttonValues[f.defaultValueIndex || 0] };
         case "Date":
           return { [f.key]: f.defaultValue };
+        case "Sites":
+          return { [f.key]: "all" };
       }
     }),
     A.reduce({}, (acc, f) => {
@@ -46,7 +50,7 @@ export const useFilter = (settings: UseFilterSettings) => {
   };
 
   return {
-    Filter: <Filter filters={settings.filters} change={changeValue} values={values} />,
+    Filter: <Filter filters={settings.filters}  change={changeValue} justifyContent={settings.justifyContent} values={values} />,
     value: values
   };
 };

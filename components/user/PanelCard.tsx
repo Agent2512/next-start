@@ -51,9 +51,9 @@ export const PanelCard = ({ panel }: { panel: allAccessPanelsResponse; }) => {
 
         deletePanel(undefined, {
             onSuccess: () => {
-                queryClient.refetchQueries(["panels"]);
-                queryClient.refetchQueries(["panelTypes"]);
-                queryClient.refetchQueries(["userAccessPanels"]);
+                queryClient.invalidateQueries(["panels"]);
+                queryClient.invalidateQueries(["panelTypes"]);
+                queryClient.invalidateQueries(["userAccessPanels"]);
             }
         });
     };
@@ -61,9 +61,9 @@ export const PanelCard = ({ panel }: { panel: allAccessPanelsResponse; }) => {
     const handleSubmit = () => {
         updatePanel(undefined, {
             onSuccess: () => {
-                queryClient.refetchQueries(["panels"]);
-                queryClient.refetchQueries(["panelTypes"]);
-                queryClient.refetchQueries(["userAccessPanels"]);
+                queryClient.invalidateQueries(["panels"]);
+                queryClient.invalidateQueries(["panelTypes"]);
+                queryClient.invalidateQueries(["userAccessPanels"]);
                 setEdit(false);
             }
         });

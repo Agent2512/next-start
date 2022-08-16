@@ -22,9 +22,9 @@ export const PanelTypeCard = ({ panelType }: {panelType: allAccessPanelTypesResp
     const handleSubmit = () => {
         updatePanelType(undefined, {
             onSuccess: () => {
-                queryClient.refetchQueries(["panels"]);
-                queryClient.refetchQueries(["panelTypes"]);
-                queryClient.refetchQueries(["userAccessPanels"]);
+                queryClient.invalidateQueries(["panels"]);
+                queryClient.invalidateQueries(["panelTypes"]);
+                queryClient.invalidateQueries(["userAccessPanels"]);
                 setEdit(false)
             }
         })
@@ -35,9 +35,9 @@ export const PanelTypeCard = ({ panelType }: {panelType: allAccessPanelTypesResp
 
         deletePanelType(undefined, {
             onSuccess: () => {
-                queryClient.refetchQueries(["panels"]);
-                queryClient.refetchQueries(["panelTypes"]);
-                queryClient.refetchQueries(["userAccessPanels"]);
+                queryClient.invalidateQueries(["panels"]);
+                queryClient.invalidateQueries(["panelTypes"]);
+                queryClient.invalidateQueries(["userAccessPanels"]);
             }
         })
     }

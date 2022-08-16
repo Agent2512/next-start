@@ -1,14 +1,24 @@
-import { Button, ButtonGroup, Flex, Input, Select, Text, useColorMode } from '@chakra-ui/react';
+import { Button, ButtonGroup, Flex, FlexboxProps, Input, Select, Text, useColorMode } from '@chakra-ui/react';
 import { A, N } from '@mobily/ts-belt';
+import { useQuery } from '@tanstack/react-query';
 import { ChangeEvent, HTMLInputTypeAttribute } from 'react';
+import { useApi } from '../hooks/useApi';
+import { sitesResponse } from '../pages/api/sites';
 
-export type Filters = SelectFilter | IncrementFilter | InputFilter | ButtonGroupFilter | DateFilter;
+export type Filters = SelectFilter | IncrementFilter | InputFilter | ButtonGroupFilter | DateFilter | SitesFilter
 
-export const Filter = ({ filters, change, values }: { filters: Filters[], change: (e: any) => void, values: any }) => {
+interface Props {
+  filters: Filters[];
+  change: (e: ChangeEvent<any>) => void;
+  values: { [key: string]: any };
+  justifyContent?: FlexboxProps["justifyContent"]
+}
+
+export const Filter = ({ filters, change, values, justifyContent }: Props) => {
   const { colorMode } = useColorMode()
-  
+
   return (
-    <Flex borderColor={colorMode == "light" ? "black" : "white"} borderWidth={2} borderRadius={"md"} p={2} gap={2}>
+    <Flex borderColor={colorMode == "light" ? "black" : "white"} justifyContent={justifyContent} borderWidth={2} borderRadius={"md"} p={2} gap={2}>
       {
         A.keepMap(filters, f => {
           switch (f.type) {
@@ -22,6 +32,8 @@ export const Filter = ({ filters, change, values }: { filters: Filters[], change
               return <ButtonGroupFilter key={f.key} fliter={f} change={change} value={values[f.key]} />
             case "Date":
               return <DateFilter key={f.key} fliter={f} change={change} value={values[f.key]} />
+            case "Sites":
+              return <SitesFilter key={f.key} fliter={f} change={change} value={values[f.key]} />
           }
         })
       }
@@ -46,6 +58,7 @@ const SelectFilter = (props: { fliter: SelectFilter, change: (e: any) => void, v
   return (
     <Flex order={props.fliter.flexOrder} gap={1} alignItems="center">
       <Text fontSize={"lg"} textTransform="capitalize">{props.fliter.title || props.fliter.key}</Text>
+
       <Select name={props.fliter.key} onChange={props.change} w="fit-content" value={props.value}>
         {
           A.mapWithIndex(props.fliter.optionTexts, (i, v) => <option key={v} value={props.fliter.optionValues[i]}>{v}</option>)
@@ -153,6 +166,31 @@ const DateFilter = (props: { fliter: DateFilter, change: (e: any) => void, value
       <Text fontSize={"lg"}>{props.fliter.title || props.fliter.key}</Text>
 
       <Input type="date" name={props.fliter.key} value={props.value} onChange={props.change} />
+    </Flex>
+  )
+}
+
+type SitesFilter = {
+  flexOrder?: number
+  key: string
+  type: "Sites"
+  title?: string
+}
+
+const SitesFilter = (props: { fliter: SitesFilter, change: (e: any) => void, value: string }) => {
+  const { get } = useApi("/api/")
+  const { data, isSuccess } = useQuery(["sites"], () => get<sitesResponse>("sites"))
+
+  isSuccess && console.log(data);
+  
+
+  return (
+    <Flex alignItems={"center"} gap={1} order={props.fliter.flexOrder}>
+      <Text fontSize={"lg"} textTransform="capitalize">{props.fliter.title || props.fliter.key}</Text>
+
+      <Select name={props.fliter.key} onChange={props.change} w="fit-content" value={props.value}>
+        <option key={"all"} value={"all"}>all</option>
+      </Select>
     </Flex>
   )
 }

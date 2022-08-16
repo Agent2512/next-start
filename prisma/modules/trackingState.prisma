@@ -8,6 +8,6 @@ model trackingState {
 
 model User {
     id String @id
-    email         String?   @unique
+    email         String   @unique
     trackings trackingState[]
 }

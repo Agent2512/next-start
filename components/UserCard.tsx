@@ -48,7 +48,7 @@ const UserCardInfo = (props: { user: Session["user"] | undefined; isSuccess: boo
 
             mutate({ username, email }, {
                 onSuccess: () => {
-                    queryClient.refetchQueries(["session"]);
+                    queryClient.invalidateQueries(["session"]);
                     setEditMode(false)
                 }
             });

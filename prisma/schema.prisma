@@ -12,8 +12,8 @@ generator client {
 model User {
   id            String              @id @default(cuid())
   accessPanels  AccessPanel[]       @relation(name: "AccessPanelToUser")
-  name          String?
-  email         String?             @unique
+  name          String
+  email         String              @unique
   image         String?
   accounts      Account[]           @relation(name: "AccountToUser")
   password      String?
