@@ -78,3 +78,17 @@ const orderIdfilter = A.reduce<number, OrderIdFilter[]>([], (acc, n) => {
 
     return acc
 })
+
+export const makeSiteFilter = (sites: string) => {
+    if (sites == "all") return { ShopId: undefined, SiteId: { in: undefined } }
+
+    const siteArray = sites.split(",")
+    const [shopId, ...siteIds] = siteArray
+
+    const ret = {
+        ShopId: Number(shopId),
+        SiteId: { in: siteIds.map(s => Number(s)) }
+    }
+
+    return ret
+}

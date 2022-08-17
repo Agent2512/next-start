@@ -1,4 +1,4 @@
-import { Box, Button, Flex, Input, InputGroup, InputLeftAddon, Stack, Text } from "@chakra-ui/react";
+import { Box, Button, Flex, Input, InputGroup, InputLeftAddon, Stack, Text, useColorMode } from "@chakra-ui/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Session } from "next-auth";
 import { signOut } from "next-auth/react";
@@ -7,6 +7,7 @@ import { ChangeEvent, useEffect, useState } from "react";
 const getSession = () => fetch('/api/auth/session').then(res => (res.json() as Promise<Session>));
 
 export const UserCard = () => {
+    const { colorMode } = useColorMode()
     const { data: user, isSuccess, isLoading } = useQuery(["session"], getSession, {
         select(data) {
             const user = data.user;
@@ -19,7 +20,7 @@ export const UserCard = () => {
     }
 
     return (
-        <Flex w="20rem" fontSize={"2xl"} flexDir={"column"} borderColor="black" borderStyle="solid" borderWidth={1} borderRadius="md" h={"min-content"} p={2}>
+        <Flex w="20rem" fontSize={"2xl"} flexDir={"column"} borderColor={colorMode == "light" ? "black" : "white"} borderStyle="solid" borderWidth={1} borderRadius="md" h={"min-content"} p={2}>
             <Stack spacing={4}>
                 <Text fontSize={"3xl"} textTransform={"capitalize"}>user info</Text>
 

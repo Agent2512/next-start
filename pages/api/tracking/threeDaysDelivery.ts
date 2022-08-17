@@ -4,7 +4,7 @@ import { NextApiRequest, NextApiResponse } from "next"
 import { getOrders, makeSiteFilter } from "../../../utils/server/getOrders"
 import { hasAccess } from "../../../utils/server/hasAccess"
 
-export default async function inCustoms(req: NextApiRequest, res: NextApiResponse<InCustomsResponse>) {
+export default async function threeDaysDelivery(req: NextApiRequest, res: NextApiResponse<ThreeDaysDeliveryResponse>) {
     const access = await hasAccess(req, res, ["tracking"])
     if (!access) return
 
@@ -12,8 +12,6 @@ export default async function inCustoms(req: NextApiRequest, res: NextApiRespons
     const filter = body.filter
     const days = Number(filter.days)
     const sites = filter.sites
-
-
 
     const orderWithTracking = await getOrders({
         where: {
@@ -28,20 +26,39 @@ export default async function inCustoms(req: NextApiRequest, res: NextApiRespons
     },
         {
             Tracking: {
-                not: null
+                not: null,
             },
             Status: {
-                equals: "CUSTOMS"
+                equals: "DONE"
+            },
+            StatusUpdate: {
+                not: null
             }
         })
 
+        const ThreeDaysDelivery = pipe(
+            orderWithTracking,
+            A.filter(o => o.trackings.length != 0),
+            A.reduce(0, (acc, o) => {
+                // newestTracking by date
+                const newestTracking = o.trackings
+
+
+                return acc
+            })
+        )
+
+
+
+
     return res.json({
-        orders: orderWithTracking.length,
-        ordersInCustoms: A.filter(orderWithTracking, o => o.trackings.length != 0).length
+        orders: 0,
+        ordersWithThreeDelivery: 0
     })
 }
 
-export interface InCustomsResponse {
+export interface ThreeDaysDeliveryResponse {
     orders: number;
-    ordersInCustoms: number;
+    ordersWithThreeDelivery: number;
+
 }

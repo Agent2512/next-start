@@ -81,10 +81,12 @@ const TopNavbar = () => {
 const SideNavber = () => {
     const { data: accessPanels, isSuccess } = useQuery(["userAccessPanels"], getAccessPanels);
     const [Animate] = useAutoAnimate<HTMLDivElement>()
+    const { toggleColorMode } = useColorMode()
+
 
     return (
         <>
-            <Text fontSize={"2xl"} textAlign={"center"} textTransform={"capitalize"}>manu</Text>
+            <Text onClick={toggleColorMode} fontSize={"2xl"} textAlign={"center"} textTransform={"capitalize"}>manu</Text>
 
             <VStack ref={Animate} justifyContent={"center"} mt={2} spacing={2} px={4}>
                 <Link href='/' key='/' passHref>

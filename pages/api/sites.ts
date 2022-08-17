@@ -1,26 +1,62 @@
+import { A, D, G, pipe } from "@mobily/ts-belt";
 import { NextApiRequest, NextApiResponse } from "next";
 import { prismaConnect_common } from "../../utils/server/prismaConnect";
 
-export default async function sites(req: NextApiRequest, res: NextApiResponse<sitesResponse[]>) {
+
+
+export default async function sites(req: NextApiRequest, res: NextApiResponse) {
 
     const sites = await prismaConnect_common.siteinformation.findMany({
         where: {
             active: true
         },
         select: {
+            id: true,
             name: true,
             backendid: true,
             siteid: true,
             website: true,
+        },
+        orderBy: {
+            name: "asc"
         }
     })
 
-    return res.status(200).json(sites);
+    const multibleNames = pipe(
+        sites,
+        A.keepMap(x => x.name),
+        A.filter(name => sites.filter(x => x.name === name).length > 1),
+        A.uniq
+    )
+
+    const out = A.reduce(sites, {} as sitesResponse, (acc, x) => {
+        if (x.name && multibleNames.includes(x.name)) {
+            if (!acc[x.name]) {
+                acc[x.name] = []
+            }
+            acc[x.name].push(x)
+        }
+        else {
+            if (!acc.other) {
+                acc.other = []
+            }
+            acc.other.push(x)
+        }
+
+
+        return acc
+    })
+
+
+    return res.status(200).json(out);
 }
 
-export type sitesResponse = {
+type sites = {
+    id: number;
     name: string | null;
     backendid: number;
     siteid: number;
     website: string;
 }
+
+export type sitesResponse = { [x: string]: sites[], other: sites[] }

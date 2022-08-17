@@ -33,7 +33,7 @@ const UserAdmin = () => {
         <Layout>
             {Filter}
 
-            <Stack ref={Animate} mt={2}>
+            <Stack ref={Animate}>
                 {allUsersIsSuccess && pipe(
                     allUsers,
                     A.filter(user => value.email ? user.email.includes(value.email) : true),
