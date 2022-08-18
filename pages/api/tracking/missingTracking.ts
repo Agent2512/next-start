@@ -1,3 +1,4 @@
+import { A } from "@mobily/ts-belt"
 import dayjs from "dayjs"
 import { NextApiRequest, NextApiResponse } from "next"
 import { getOrders, makeSiteFilter } from "../../../utils/server/getOrders"
@@ -27,7 +28,7 @@ export default async function missingTracking(req: NextApiRequest, res: NextApiR
 
     return res.json({
         orders: orderWithTracking.length,
-        ordersWithOutTracking: orderWithTracking.filter(o => o.trackings.length == 0).length 
+        ordersWithOutTracking: A.filter(orderWithTracking, o => o.trackings.length == 0).length
     })
 }
 

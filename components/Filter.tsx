@@ -120,8 +120,8 @@ const InputFilter = (props: { fliter: InputFilter, change: (e: any) => void, val
 
   return (
     <Flex alignItems={"center"} gap={1} order={props.fliter.flexOrder}>
-      <Text fontSize={"lg"}>{props.fliter.title || props.fliter.key}</Text>
-      <Input type={props.fliter.inputType} name={props.fliter.key} placeholder={props.fliter.placeholder} value={props.value} onChange={props.change} borderColor={colorMode == "light" ? "black" : "white"}/>
+      <Text fontSize={"lg"} >{props.fliter.title || props.fliter.key}</Text>
+      <Input type={props.fliter.inputType} name={props.fliter.key} placeholder={props.fliter.placeholder} value={props.value} onChange={props.change} width="auto" borderColor={colorMode == "light" ? "black" : "white"}/>
     </Flex>
   )
 }

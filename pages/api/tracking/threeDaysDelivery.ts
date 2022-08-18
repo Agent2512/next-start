@@ -1,4 +1,4 @@
-import { A, pipe } from "@mobily/ts-belt"
+import { A, N, pipe } from "@mobily/ts-belt"
 import dayjs from "dayjs"
 import { NextApiRequest, NextApiResponse } from "next"
 import { getOrders, makeSiteFilter } from "../../../utils/server/getOrders"
@@ -36,24 +36,43 @@ export default async function threeDaysDelivery(req: NextApiRequest, res: NextAp
             }
         })
 
-        const ThreeDaysDelivery = pipe(
-            orderWithTracking,
-            A.filter(o => o.trackings.length != 0),
-            A.reduce(0, (acc, o) => {
-                // newestTracking by date
-                const newestTracking = o.trackings
+    const ThreeDaysDelivery = pipe(
+        orderWithTracking,
+        A.filter(o => o.trackings.length != 0),
+        A.reduce(0, (acc, o) => {
+            // newestTracking by date
+            const newestTracking = pipe(
+                o.trackings,
+                A.keepMap(t => {
+                    if (t.StatusUpdate == null) return
+                    return t.StatusUpdate.toISOString()
+                }),
+                A.reduce(new Date("0").toISOString(), (acc2, date) => {
+                    return dayjs(date).isAfter(dayjs(acc2)) ? date : acc2
+                }),
+                dayjs
+            )
 
+            const days = dayjs(newestTracking).diff(o.DateCreated, "day")
 
-                return acc
-            })
-        )
+            let counter = 0
 
+            for (let i = 0; i < days; i++) {
+                const date = dayjs(o.DateCreated).add(i, "day")
+                if (date.day() != 0 && date.day() != 6) {
+                    counter++
+                }
+            }
 
+            if (N.lte(counter, 3)) return acc = acc + 1
 
+            return acc
+        })
+    )
 
     return res.json({
-        orders: 0,
-        ordersWithThreeDelivery: 0
+        orders: orderWithTracking.length,
+        ordersWithThreeDelivery: ThreeDaysDelivery
     })
 }
 
