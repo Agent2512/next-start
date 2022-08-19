@@ -7,18 +7,15 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-
     "db-format": "prismix && prisma format",
     "db-push": "prismix && prisma format && prisma db push",
     "db-gen": "prismix && prisma format && prisma generate",
     "db-all": "prismix && prisma format && prisma generate && prisma db push",
     "db-web": "prisma studio",
     "db-pull": "prisma db pull",
-
     "db-saf-pull": "prisma db pull --schema=./prisma/db/saf.prisma",
     "db-saf-gen": "prisma generate --schema=./prisma/db/saf.prisma",
     "db-saf-web": "prisma studio --schema=./prisma/db/saf.prisma",
-
     "db-common-pull": "prisma db pull --schema=./prisma/db/common.prisma",
     "db-common-gen": "prisma generate --schema=./prisma/db/common.prisma",
     "db-common-web": "prisma studio --schema=./prisma/db/common.prisma"
@@ -26,6 +23,7 @@
   "dependencies": {
     "@chakra-ui/icons": "^2.0.6",
     "@chakra-ui/react": "^2.2.4",
+    "@chakra-ui/react-use-size": "^2.0.2",
     "@emotion/react": "^11.9.3",
     "@emotion/styled": "^11.9.3",
     "@formkit/auto-animate": "1.0.0-beta.1",

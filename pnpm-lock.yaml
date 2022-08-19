@@ -3,6 +3,7 @@ lockfileVersion: 5.4
 specifiers:
   '@chakra-ui/icons': ^2.0.6
   '@chakra-ui/react': ^2.2.4
+  '@chakra-ui/react-use-size': ^2.0.2
   '@emotion/react': ^11.9.3
   '@emotion/styled': ^11.9.3
   '@formkit/auto-animate': 1.0.0-beta.1
@@ -35,6 +36,7 @@ specifiers:
 dependencies:
   '@chakra-ui/icons': 2.0.8_hsmxbru7kh4m4fkmapdkd6vvgu
   '@chakra-ui/react': 2.2.8_pfyigycnene34nz5tn5ypsuepi
+  '@chakra-ui/react-use-size': 2.0.2_react@18.2.0
   '@emotion/react': 11.10.0_dekd3qhq25os2zmp2sxj6oaoou
   '@emotion/styled': 11.10.0_cvyjuqpqzsw2jroi6znapo3uiq
   '@formkit/auto-animate': 1.0.0-beta.1_react@18.2.0
@@ -1675,9 +1677,27 @@ packages:
       '@nodelib/fs.scandir': 2.1.5
       fastq: 1.13.0
 
-  /@oclif/command/1.8.16:
+  /@oclif/command/1.8.16_@oclif+config@1.18.2:
     resolution: {integrity: sha512-rmVKYEsKzurfRU0xJz+iHelbi1LGlihIWZ7Qvmb/CBz1EkhL7nOkW4SVXmG2dA5Ce0si2gr88i6q4eBOMRNJ1w==}
     engines: {node: '>=12.0.0'}
+    peerDependencies:
+      '@oclif/config': ^1
+    dependencies:
+      '@oclif/config': 1.18.2
+      '@oclif/errors': 1.3.5
+      '@oclif/help': 1.0.1
+      '@oclif/parser': 3.8.7
+      debug: 4.3.4
+      semver: 7.3.7
+    transitivePeerDependencies:
+      - supports-color
+    dev: false
+
+  /@oclif/command/1.8.16_@oclif+config@1.18.3:
+    resolution: {integrity: sha512-rmVKYEsKzurfRU0xJz+iHelbi1LGlihIWZ7Qvmb/CBz1EkhL7nOkW4SVXmG2dA5Ce0si2gr88i6q4eBOMRNJ1w==}
+    engines: {node: '>=12.0.0'}
+    peerDependencies:
+      '@oclif/config': ^1
     dependencies:
       '@oclif/config': 1.18.3
       '@oclif/errors': 1.3.5
@@ -1763,7 +1783,7 @@ packages:
     resolution: {integrity: sha512-QuSiseNRJygaqAdABYFWn/H1CwIZCp9zp/PLid6yXvy6VcQV7OenEFF5XuYaCvSARe2Tg9r8Jqls5+fw1A9CbQ==}
     engines: {node: '>=8.0.0'}
     dependencies:
-      '@oclif/command': 1.8.16
+      '@oclif/command': 1.8.16_@oclif+config@1.18.2
       '@oclif/config': 1.18.2
       '@oclif/errors': 1.3.5
       '@oclif/help': 1.0.1
@@ -4854,7 +4874,7 @@ packages:
     peerDependencies:
       dotenv: ^10.0.0
     dependencies:
-      '@oclif/command': 1.8.16
+      '@oclif/command': 1.8.16_@oclif+config@1.18.3
       '@oclif/config': 1.18.3
       '@oclif/plugin-help': 3.3.1
       '@prisma/sdk': 3.15.2

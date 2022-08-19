@@ -1,13 +1,12 @@
-import { Box, Breadcrumb, BreadcrumbItem, BreadcrumbLink, Button, Grid, GridItem, Text, useColorMode, useColorModePreference, useTheme, VStack } from "@chakra-ui/react";
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, Button, Grid, GridItem, Text, useColorMode, VStack } from "@chakra-ui/react";
+import { useSize } from "@chakra-ui/react-use-size";
 import { A, D } from "@mobily/ts-belt";
 import { useQuery } from "@tanstack/react-query";
 import { signIn } from "next-auth/react";
-import { ReactNode } from "react";
-import { AccessPanel, AccessPanelType } from "../prisma/lib/main";
 import Link from 'next/link';
-import router, { useRouter } from "next/router";
-import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { useLocalStorage } from "../hooks/useLocalStorage";
+import { useRouter } from "next/router";
+import { Dispatch, ReactNode, SetStateAction, useEffect, useRef, useState } from "react";
+import { AccessPanel, AccessPanelType } from "../prisma/lib/main";
 
 type AccessPanelAndType = AccessPanel & {
     type: AccessPanelType | null;
@@ -22,11 +21,12 @@ interface props {
 
 const Layout = ({ children }: props) => {
     const { colorMode } = useColorMode()
+    const [sideSize, setSideSize] = useState({ width: 162.625, height: 524.625 });
 
     return (
         <Grid h="100vh" templateRows="auto 1fr" templateColumns="auto 1fr" >
-            <GridItem rowSpan={2} borderColor={colorMode == "light" ? "black" : "white"} borderStyle={"solid"} borderRightWidth={2} >
-                <SideNavber />
+            <GridItem w={sideSize.width} rowSpan={2} borderColor={colorMode == "light" ? "black" : "white"} borderStyle={"solid"} borderRightWidth={2} >
+                <SideNavber setSize={setSideSize} />
             </GridItem>
 
             <GridItem borderColor={colorMode == "light" ? "black" : "white"} borderStyle={"solid"} borderBottomWidth={2}>
@@ -77,18 +77,27 @@ const TopNavbar = () => {
     )
 }
 
-
-const SideNavber = () => {
+const SideNavber = ({ setSize }: { setSize: Dispatch<SetStateAction<{ width: number, height: number }>> }) => {
     const { data: accessPanels, isSuccess } = useQuery(["userAccessPanels"], getAccessPanels);
-    const [Animate] = useAutoAnimate<HTMLDivElement>()
+    // const [Animate] = useAutoAnimate<HTMLDivElement>()
     const { toggleColorMode } = useColorMode()
+    const elementRef = useRef<HTMLDivElement>(null)
+    const size = useSize(elementRef)
+
+    useEffect(() => {
+        size && setSize(size);
+    }, [size])
+
+    useEffect(() => {
+        (window as any).toggleColorMode = toggleColorMode
+    })
 
 
     return (
         <>
             <Text onClick={toggleColorMode} fontSize={"2xl"} textAlign={"center"} textTransform={"capitalize"}>manu</Text>
 
-            <VStack ref={Animate} justifyContent={"center"} mt={2} spacing={2} px={4}>
+            <VStack ref={elementRef} justifyContent={"center"} mt={2} spacing={2} px={4} pos={"fixed"}>
                 <Link href='/' key='/' passHref>
                     <Button as='a' h={"auto"} w={"full"} py={2} flexDir="column" textColor="white" textTransform={"capitalize"} bgGradient={`linear(to-t, gray.500, black)`}>
                         Dashboard
