@@ -12,6 +12,7 @@ export default async function tableData(req: NextApiRequest, res: NextApiRespons
     const filter = body.filter
     const numPage = Number(filter.page)
     const sites = filter.sites
+    const perPage = 10
 
     const siteinformation = await prismaConnect_common.siteinformation.findMany()
 
@@ -22,7 +23,7 @@ export default async function tableData(req: NextApiRequest, res: NextApiRespons
         orderBy: {
             DateCreated: "desc",
         },
-        skip: 10 * (numPage - 1),
+        skip: perPage * (numPage - 1),
         take: 100
     })
         .then(orders => {
@@ -42,7 +43,7 @@ export default async function tableData(req: NextApiRequest, res: NextApiRespons
 
 
 
-    return res.json(A.slice(orderWithTracking, 0, 30))
+    return res.json(A.slice(orderWithTracking, 0, perPage))
 }
 
 export type TableDataResponse = OrderWithTracking

@@ -41,7 +41,7 @@ export const getOrders = async (orderArgs?: Prisma.OrderFindManyArgs, trackingAr
 
 type OrderIdFilter = { OrderId: { gte: number, lte: number } }
 
-const orderIdfilter = A.reduce<number, OrderIdFilter[]>([], (acc, n) => {
+export const orderIdfilter = A.reduce<number, OrderIdFilter[]>([], (acc, n) => {
     const last = A.last(acc)
 
     if (!last) {

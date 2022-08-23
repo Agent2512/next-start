@@ -1,12 +1,14 @@
 import { ArrowForwardIcon } from "@chakra-ui/icons"
-import { Table, TableContainer, Tbody, Td, Th, Thead, Tr, useBoolean, useColorMode } from "@chakra-ui/react"
-import { A } from "@mobily/ts-belt"
+import { Button, Flex, Table, TableContainer, Tbody, Td, Text, Th, Thead, Tr, useBoolean, useColorMode } from "@chakra-ui/react"
+import { A, Option, pipe } from "@mobily/ts-belt"
 import { useQuery } from "@tanstack/react-query"
 import dayjs from "dayjs"
+import { Session } from "next-auth"
 import Layout from "../../components/layout"
 import { useApi } from "../../hooks/useApi"
 import { useFilter } from "../../hooks/useFilter"
 import { TableDataResponse } from "../api/tracking/tableData"
+import { trackingStatesResponse } from "../api/tracking/tableDataRowStates"
 
 const TrackingTable = () => {
     const { Filter, value: filterValue } = useFilter({
@@ -14,8 +16,13 @@ const TrackingTable = () => {
         filters: [
             {
                 type: "Input",
-                key: "search",
-                title: "Order nr. / Tracking nr. / Reference"
+                key: "orderNumber",
+                title: "Order nr."
+            },
+            {
+                type: "Input",
+                key: "trackingNumber/Reference",
+                title: "Tracking nr. / Reference"
             },
             {
                 type: "Increment",
@@ -31,7 +38,11 @@ const TrackingTable = () => {
     })
     const { post } = useApi("/api/tracking/")
     const { data: tableData, isSuccess: tableDataSuccess } = useQuery(["tableData", filterValue], () => post<TableDataResponse[]>("tableData", { filter: filterValue }))
-
+    const { data: trackingStates } = useQuery(["trackingStates", filterValue], () => post<trackingStatesResponse[]>("tableDataRowStates", {
+        filter: filterValue,
+        ids: tableDataSuccess && pipe(tableData, A.map(o => o.trackings), A.flat, A.map(o => o.Id))
+    }),
+        { enabled: tableDataSuccess, initialData: [] })
 
     return (
         <Layout>
@@ -50,7 +61,7 @@ const TrackingTable = () => {
                     </Thead>
 
                     <Tbody>
-                        {tableDataSuccess && A.map(tableData, order => <Row key={order.Id} order={order} />)}
+                        {tableDataSuccess && A.map(tableData, order => <Row key={order.Id} order={order} trackingStates={trackingStates} />)}
                     </Tbody>
                 </Table>
             </TableContainer>
@@ -62,7 +73,7 @@ TrackingTable.auth = true
 
 export default TrackingTable
 
-const Row = ({ order }: { order: TableDataResponse }) => {
+const Row = ({ order, trackingStates }: { order: TableDataResponse, trackingStates: trackingStatesResponse[] }) => {
     const [open, setOpen] = useBoolean(false)
     const { colorMode } = useColorMode()
 
@@ -97,7 +108,10 @@ const Row = ({ order }: { order: TableDataResponse }) => {
                                 Last update<br />{dayjs(v.StatusUpdate).format("HH:mm DD/MM/YYYY") || "not set yet"}
                             </Td>
                             <Td display={"flex"} flexDir="row-reverse">
-                                {/* <FollowButtonController id={v.Id} /> */}
+                                <FollowButtonController
+                                    id={v.Id}
+                                    state={A.getBy(trackingStates, t => t.id == v.Id)}
+                                />
                             </Td>
                         </Tr>
                     )
@@ -105,4 +119,24 @@ const Row = ({ order }: { order: TableDataResponse }) => {
             }
         </>
     )
+}
+
+const FollowButtonController = ({ id, state }: { id: number, state: Option<trackingStatesResponse> }) => {
+    const { get } = useApi("/api/auth/")
+    const { data: session, isSuccess } = useQuery(["session"], () => get<Session>("session"))
+
+    if (!state) return <Button colorScheme={"messenger"}>Add follow up</Button>
+    else if (state.state == "FOLLOW") return <Button colorScheme={"green"}>Follow</Button>
+    else if (state.state == "HAS-FOLLOW" && state.user == null) return <Button colorScheme={"green"}>Follow</Button>
+    else if (isSuccess && state.state == "HAS-FOLLOW" && state.user?.email == session.user.email) return <Button colorScheme={"cyan"}>say follow up is done</Button>
+    else if (state.state == "HAS-FOLLOW" && state.user) return <Text textAlign={"center"}>Order has follow by<br /><Text fontWeight={"bold"} as="span">{state.user.name} - {state.user.email}</Text></Text>
+    else if (state.state == "FOLLOW-DONE" && state.user == null) return <Text>follow up has been done</Text>
+    else if (state.state == "FOLLOW-DONE" && state.user != null) return (
+        <Flex gap={4}>
+            <Text textAlign={"center"}>follow up has been done by<br /><Text fontWeight={"bold"} as="span">{state.user.name} - {state.user.email}</Text></Text>
+            <Button colorScheme={"green"}>Follow</Button>
+        </Flex>
+    )
+
+    return <></>
 }
