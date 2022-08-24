@@ -95,7 +95,7 @@ const SideNavber = ({ setSize }: { setSize: Dispatch<SetStateAction<{ width: num
 
     return (
         <>
-            <Text onClick={toggleColorMode} fontSize={"2xl"} textAlign={"center"} textTransform={"capitalize"}>manu</Text>
+            <Text onClick={toggleColorMode} fontSize={"2xl"} textAlign={"center"} textTransform={"capitalize"}>menu</Text>
 
             <VStack ref={elementRef} justifyContent={"center"} mt={2} spacing={2} px={4} pos={"fixed"}>
                 <Link href='/' key='/' passHref>

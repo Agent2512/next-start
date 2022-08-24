@@ -1,10 +1,12 @@
-import { A, D, G, pipe } from "@mobily/ts-belt";
+import { A, pipe } from "@mobily/ts-belt";
 import { NextApiRequest, NextApiResponse } from "next";
 import { prismaConnect_common } from "../../utils/server/prismaConnect";
 
 
 
 export default async function sites(req: NextApiRequest, res: NextApiResponse) {
+    const query = req.query;
+    const format = query.format as string;
 
     const sites = await prismaConnect_common.siteinformation.findMany({
         where: {
@@ -21,6 +23,10 @@ export default async function sites(req: NextApiRequest, res: NextApiResponse) {
             name: "asc"
         }
     })
+
+    if (format === "list") {
+        return res.json(sites);
+    }
 
     const multibleNames = pipe(
         sites,
@@ -60,3 +66,4 @@ type sites = {
 }
 
 export type sitesResponse = { [x: string]: sites[], other: sites[] }
+export type sitesResponseList = sites[]

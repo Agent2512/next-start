@@ -1,9 +1,9 @@
-import { Button, Checkbox, Flex, Grid, Input, Stack, Text, useColorMode } from "@chakra-ui/react";
+import { Button, Checkbox, Flex, Grid, Stack, Text, useColorMode } from "@chakra-ui/react";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { A, pipe } from "@mobily/ts-belt";
+import { A, pipe, S } from "@mobily/ts-belt";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ChangeEvent, MouseEvent, useState } from "react";
-import Layout from "../../components/layout"
+import { ChangeEvent, useState } from "react";
+import Layout from "../../components/layout";
 import { useApi } from "../../hooks/useApi";
 import { useFilter } from "../../hooks/useFilter";
 import { allAccessPanelsResponse } from "../api/user/allAccessPanels";
@@ -76,14 +76,14 @@ const UserItem = ({ user }: { user: AllUsersResponse }) => {
         const panel = panelsIsSuccess ? A.find(panels, panel => panel.id.toString() == value) : undefined
 
         if (panel) {
-            ToggleUserPanel({panel, setTo: checked}, {
+            ToggleUserPanel({ panel, setTo: checked }, {
                 onSuccess: () => {
                     queryClient.invalidateQueries(["allUsers"])
                     queryClient.invalidateQueries(["userAccessPanels"])
                 }
             })
         }
-        
+
     }
 
     return (
@@ -115,7 +115,7 @@ const UserItem = ({ user }: { user: AllUsersResponse }) => {
                                 {A.map(pt.accessPanels, ap => {
                                     const bool = A.find(user.accessPanels, uap => uap.id === ap.id) ? true : false
 
-                                    return <Checkbox key={ap.id} value={ap.id} onChange={handleToggle} defaultChecked={bool}>{ap.panel.replace("\\n", " ")}</Checkbox>
+                                    return <Checkbox key={ap.id} value={ap.id} onChange={handleToggle} defaultChecked={bool}>{S.replaceAll(ap.panel, "\\n", " ")}</Checkbox>
                                 })}
                             </Flex>
                         )

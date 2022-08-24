@@ -1,7 +1,7 @@
-import { Flex, InputGroup, InputLeftAddon, Input, Select, Button, Text, useColorMode } from "@chakra-ui/react";
-import { A } from "@mobily/ts-belt";
-import { useQueryClient, useMutation, useQuery } from "@tanstack/react-query";
-import { useState, ChangeEvent } from "react";
+import { Button, Flex, Input, InputGroup, InputLeftAddon, Select, Text, useColorMode } from "@chakra-ui/react";
+import { A, S } from "@mobily/ts-belt";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { ChangeEvent, useState } from "react";
 import { useApi } from "../../hooks/useApi";
 import { allAccessPanelsResponse } from "../../pages/api/user/allAccessPanels";
 import { allAccessPanelTypesResponse } from "../../pages/api/user/allAccessPanelTypes";
@@ -101,7 +101,7 @@ export const PanelCard = ({ panel }: { panel: allAccessPanelsResponse; }) => {
     return (
         <Flex flexDir={"column"} alignItems={"center"} justifyContent={"space-between"} borderColor={colorMode == "light" ? "black" : "white"} borderStyle={"solid"} borderWidth={1} borderRadius={"md"} bgGradient={`linear(to-t, ${panel.type ? panel.type.color : "#000"} 50%, black)`}>
             <Flex p={2} minW={"32"} flexDir={"column"} alignItems={"center"} textColor="white">
-                <Text textTransform={"capitalize"}>{panel.panel.replace("\\n", " ")}</Text>
+                <Text textTransform={"capitalize"}>{S.replaceAll(panel.panel, "\\n", " ")}</Text>
                 <Text>Url: {panel.url}</Text>
                 <Text textTransform={"capitalize"}>type: {panel.type ? panel.type.type : "not set"}</Text>
                 <Text>Users: {panel.users.length}</Text>

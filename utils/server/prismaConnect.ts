@@ -1,6 +1,6 @@
-import { PrismaClient } from "../../prisma/lib/main"
-import { PrismaClient as PrismaClient_saf } from '../../prisma/lib/saf';
 import { PrismaClient as PrismaClient_common } from '../../prisma/lib/common';
+import { PrismaClient } from "../../prisma/lib/main";
+import { PrismaClient as PrismaClient_saf } from '../../prisma/lib/saf';
 
 declare global {
     // allow global `var` declarations
