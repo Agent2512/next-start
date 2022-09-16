@@ -1,49 +1,102 @@
-import { A } from "@mobily/ts-belt"
+import { A, N, pipe, S } from "@mobily/ts-belt"
 import { NextApiRequest, NextApiResponse } from "next"
-import { getOrders, makeSiteFilter, OrderWithTracking } from "../../../utils/server/getOrders"
+import { getOrders, getOrdersTest, makeSiteFilter, orderIdfilter, OrderWithTracking } from "../../../utils/server/getOrders"
 import { hasAccess } from "../../../utils/server/hasAccess"
-import { prismaConnect_common } from "../../../utils/server/prismaConnect"
+import { prismaConnect_common, prismaConnect_saf } from "../../../utils/server/prismaConnect"
 
-export default async function tableData(req: NextApiRequest, res: NextApiResponse) {
+export default async function trackingTableData(req: NextApiRequest, res: NextApiResponse) {
     const access = await hasAccess(req, res, ["tracking/table"])
     if (!access) return
 
     const body = req.body
     const filter = body.filter
+
     const numPage = Number(filter.page)
-    const sites = filter.sites
     const perPage = 10
+
+    const orderNumber = filter.orderNumber as string
+    const trackingNumberOrReference = filter.trackingNumberOrReference as string
+
+    if (N.lte(numPage, 0)) return res.json([])
 
     const siteinformation = await prismaConnect_common.siteinformation.findMany()
 
-    const orderWithTracking = await getOrders({
+    const trackingOrderIds = trackingNumberOrReference == "" ? null : await prismaConnect_saf.tracking.groupBy({
+        by: ["OrderId"],
         where: {
-            ...makeSiteFilter(sites)
+            OR: [
+                {
+                    Reference: {
+                        contains: trackingNumberOrReference
+                    }
+                },
+                {
+                    Tracking: {
+                        contains: trackingNumberOrReference
+                    }
+                },
+
+            ]
         },
-        orderBy: {
-            DateCreated: "desc",
-        },
-        skip: perPage * (numPage - 1),
-        take: 100
+        _count: true
     })
-        .then(orders => {
-            return orders.map(order => {
-                const site = A.getBy(siteinformation, s => s.backendid == order.ShopId && s.siteid == order.SiteId)
-                if (!site) return order
 
-                const ret = {
-                    ...order,
-                    Webshop: site.website
+    const orderIds = trackingOrderIds == null ? null : pipe(
+        trackingOrderIds,
+        A.keepMap(o => { if (o.OrderId) return o.OrderId }),
+        A.uniq,
+        A.sort((a, b) => a - b),
+        orderIdfilter,
+        JSON.stringify,
+        S.replaceAll("OrderId", "Id"),
+        JSON.parse,
+    )
+
+    const orderWithTracking = orderIds != null ?
+        await getOrdersTest(
+            orderIds,
+            {
+                where: {
+                    ...makeSiteFilter(filter.sites),
+                    OrderNumber: {
+                        gte: orderNumber == "" ? undefined : Number(orderNumber.padEnd(6, "0")),
+                        lte: orderNumber == "" ? undefined : Number(orderNumber.padEnd(6, "9"))
+                    },
+                },
+                take: perPage,
+                skip: perPage * (numPage - 1),
+                orderBy: {
+                    DateCreated: "desc"
                 }
-
-                return ret
             })
+        : await getOrders({
+            where: {
+                ...makeSiteFilter(filter.sites),
+                OrderNumber: {
+                    gte: orderNumber == "" ? undefined : Number(orderNumber.padEnd(6, "0")),
+                    lte: orderNumber == "" ? undefined : Number(orderNumber.padEnd(6, "9"))
+                },
+            },
+            take: perPage,
+            skip: perPage * (numPage - 1),
+            orderBy: {
+                DateCreated: "desc"
+            }
         })
 
-
-
-
-    return res.json(A.slice(orderWithTracking, 0, perPage))
+    return res.json(
+        pipe(
+            orderWithTracking,
+            A.map(o => {
+                const site = A.getBy(siteinformation, s => s.backendid == o.ShopId && s.siteid == o.SiteId)
+                if (!site) return o
+                return {
+                    ...o,
+                    Webshop: site.website,
+                }
+            })
+        )
+    )
 }
 
-export type TableDataResponse = OrderWithTracking
+export type TrackingTableDataResponse = OrderWithTracking

@@ -1,11 +1,11 @@
-import type { AppProps } from 'next/app'
-import { QueryClient, QueryClientProvider, Hydrate, useQuery } from '@tanstack/react-query'
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { ChakraProvider } from '@chakra-ui/react'
-import { SessionProvider, signIn } from "next-auth/react"
-import { useState } from 'react'
-import type { Session } from 'next-auth'
 import { D } from '@mobily/ts-belt'
+import { Hydrate, QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+import type { Session } from 'next-auth'
+import { SessionProvider, signIn } from "next-auth/react"
+import type { AppProps } from 'next/app'
+import { useState } from 'react'
 import { useApi } from '../hooks/useApi'
 
 
@@ -16,12 +16,21 @@ interface Props {
 }
 
 function MyApp({ Component, pageProps }: AppProps & Props) {
-  const [queryClient] = useState(() => new QueryClient())
+  const [queryClient] = useState(() => new QueryClient({
+    defaultOptions: {
+      queries: {
+        refetchOnWindowFocus: false,
+        refetchOnMount: true,
+        refetchOnReconnect: true,
+        refetchInterval: 1000 * 60 * 5,
+      }
+    }
+  }))
 
   return (
     <QueryClientProvider client={queryClient} contextSharing={true}>
       <Hydrate state={pageProps.dehydratedState}>
-        <SessionProvider session={pageProps.session}>
+        <SessionProvider session={pageProps.session} refetchOnWindowFocus>
           <ChakraProvider>
 
 

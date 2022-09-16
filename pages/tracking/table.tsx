@@ -1,17 +1,18 @@
 import { ArrowForwardIcon } from "@chakra-ui/icons"
 import { Button, Flex, Table, TableContainer, Tbody, Td, Text, Th, Thead, Tr, useBoolean, useColorMode } from "@chakra-ui/react"
-import { A, Option, pipe } from "@mobily/ts-belt"
+import { A, N, Option } from "@mobily/ts-belt"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import dayjs from "dayjs"
 import { Session } from "next-auth"
+import { useEffect, useState } from "react"
 import Layout from "../../components/layout"
 import { useApi } from "../../hooks/useApi"
 import { useFilter } from "../../hooks/useFilter"
-import { TableDataResponse } from "../api/tracking/tableData"
+import { TrackingTableDataResponse } from "../api/tracking/tableData"
 import { trackingStatesResponse } from "../api/tracking/tableDataRowStates"
 
 const TrackingTable = () => {
-    const { Filter, value: filterValue } = useFilter({
+    const { Filter, value: filterValue, setValue: setFilterValues } = useFilter({
         justifyContent: "center",
         filters: [
             {
@@ -21,7 +22,7 @@ const TrackingTable = () => {
             },
             {
                 type: "Input",
-                key: "trackingNumber/Reference",
+                key: "trackingNumberOrReference",
                 title: "Tracking nr. / Reference"
             },
             {
@@ -36,13 +37,68 @@ const TrackingTable = () => {
             }
         ]
     })
+    const [currentPage, setCurrentPage] = useState<number>(filterValue.page)
+    const QueryClient = useQueryClient()
     const { post } = useApi("/api/tracking/")
-    const { data: tableData, isSuccess: tableDataSuccess } = useQuery(["tableData", filterValue], () => post<TableDataResponse[]>("tableData", { filter: filterValue }))
-    const { data: trackingStates } = useQuery(["trackingStates", filterValue], () => post<trackingStatesResponse[]>("tableDataRowStates", {
-        filter: filterValue,
-        ids: tableDataSuccess && pipe(tableData, A.map(o => o.trackings), A.flat, A.map(o => o.Id))
-    }),
-        { enabled: tableDataSuccess, initialData: [] })
+    const getBefore = () => post<TrackingTableDataResponse[]>("tableData", { filter: { ...filterValue, page: filterValue.page - 1 } })
+    const getNow = () => post<TrackingTableDataResponse[]>("tableData", { filter: filterValue })
+    const getNext = () => post<TrackingTableDataResponse[]>("tableData", { filter: { ...filterValue, page: filterValue.page + 1 } })
+
+    const { data: beforeData, isSuccess: beforeDataSuccess, isStale: beforeDataStale } = useQuery(
+        ["trackingTableData", "before"],
+        getBefore
+    )
+    const { data: tableData, isSuccess: tableDataSuccess, isStale: tableDataStale } = useQuery(
+        ["trackingTableData", "now"],
+        getNow,
+        {
+            enabled: false,
+            initialData: [],
+        }
+    )
+    const { data: nextData, isSuccess: nextDataSuccess, isStale: nextDataStale } = useQuery(
+        ["trackingTableData", "next"],
+        getNext
+    )
+
+
+    useEffect(() => {
+        QueryClient.fetchQuery(["trackingTableData", "before"])
+        QueryClient.fetchQuery(["trackingTableData", "now"])
+        QueryClient.fetchQuery(["trackingTableData", "next"])
+
+        setFilterValues(pre => {
+            return {
+                ...pre,
+                page: 1
+            }
+        })
+    }, [filterValue.sites, filterValue.orderNumber, filterValue.trackingNumberOrReference])
+
+
+    useEffect(() => {
+        const page = filterValue.page as number
+        setCurrentPage(page)
+
+        if (N.gt(page, currentPage)) {
+            // dir = "up";
+            QueryClient.setQueryData(["trackingTableData", "now"], nextData)
+
+        }
+        if (N.lt(page, currentPage)) {
+            // dir = "down";
+            QueryClient.setQueryData(["trackingTableData", "now"], beforeData)
+        }
+
+        QueryClient.fetchQuery(["trackingTableData", "next"])
+        QueryClient.fetchQuery(["trackingTableData", "before"])
+    }, [filterValue.page])
+
+    useEffect(() => {
+        if (beforeDataSuccess && beforeData.length == 0 && currentPage == 1) {
+            QueryClient.fetchQuery(["trackingTableData", "now"])
+        }
+    }, [beforeData])
 
     return (
         <Layout>
@@ -61,7 +117,7 @@ const TrackingTable = () => {
                     </Thead>
 
                     <Tbody>
-                        {tableDataSuccess && A.map(tableData, order => <Row key={order.Id} order={order} trackingStates={trackingStates} />)}
+                        {tableDataSuccess && A.map(tableData, order => <Row key={order.Id} order={order} trackingStates={[]} />)}
                     </Tbody>
                 </Table>
             </TableContainer>
@@ -73,7 +129,7 @@ TrackingTable.auth = true
 
 export default TrackingTable
 
-const Row = ({ order, trackingStates }: { order: TableDataResponse, trackingStates: trackingStatesResponse[] }) => {
+const Row = ({ order, trackingStates }: { order: TrackingTableDataResponse, trackingStates: trackingStatesResponse[] }) => {
     const [open, setOpen] = useBoolean(false)
     const { colorMode } = useColorMode()
 
@@ -159,7 +215,11 @@ const FollowButtonController = ({ id, state }: { id: number, state: Option<track
     else if (state.state == "HAS-FOLLOW" && state.user == null) return <Button colorScheme={"green"} onClick={takeFollow}>Follow</Button>
     else if (isSuccess && state.state == "HAS-FOLLOW" && state.user?.email == session.user.email) return <Button colorScheme={"cyan"} onClick={doneFollow}>say follow up is done</Button>
     else if (state.state == "HAS-FOLLOW" && state.user) return <Text textAlign={"center"}>Order has follow by<br /><Text fontWeight={"bold"} as="span">{state.user.name} - {state.user.email}</Text></Text>
-    else if (state.state == "FOLLOW-DONE" && state.user == null) return <Text>follow up has been done</Text>
+    else if (state.state == "FOLLOW-DONE" && state.user == null) return (
+        <Flex gap={4}>
+            <Text>follow up has been done</Text>
+            <Button colorScheme={"green"} onClick={takeFollow}>Follow</Button>
+        </Flex>)
     else if (state.state == "FOLLOW-DONE" && state.user != null) return (
         <Flex gap={4}>
             <Text textAlign={"center"}>follow up has been done by<br /><Text fontWeight={"bold"} as="span">{state.user.name} - {state.user.email}</Text></Text>

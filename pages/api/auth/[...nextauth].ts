@@ -1,8 +1,8 @@
-import NextAuth from "next-auth"
-import CredentialsProvider from "next-auth/providers/credentials"
 import { PrismaAdapter } from '@next-auth/prisma-adapter';
+import { compareSync, hashSync } from "bcrypt";
+import NextAuth from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
 import { prismaConnect } from '../../../utils/server/prismaConnect';
-import { hashSync, compareSync } from "bcrypt"
 
 declare module "next-auth" {
     /**
@@ -30,6 +30,10 @@ export default NextAuth({
             async authorize(credentials) {
                 const email = credentials?.email
                 const password = credentials?.password
+                console.log(credentials);
+
+                console.log(email, password);
+
 
                 if (!email || !password) return null
 
@@ -64,14 +68,14 @@ export default NextAuth({
         async session({ session }) {
             if (session.user.email) {
                 const user = await getUser(session.user.email)
-                
+
                 if (user) {
                     session.user.name = user.name
                     session.user.image = user.image
                     session.user.email = user.email
                 }
             }
-            
+
 
             return session
         },
@@ -99,3 +103,5 @@ const getUser = (email: string) => {
         },
     })
 }
+
+

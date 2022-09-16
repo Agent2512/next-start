@@ -7,10 +7,11 @@ import { prismaConnect_common } from "../../utils/server/prismaConnect";
 export default async function sites(req: NextApiRequest, res: NextApiResponse) {
     const query = req.query;
     const format = query.format as string;
+    const active = query.active as string | undefined;
 
     const sites = await prismaConnect_common.siteinformation.findMany({
         where: {
-            active: true
+            active: active == undefined ? true : active == "true" ? true : false
         },
         select: {
             id: true,

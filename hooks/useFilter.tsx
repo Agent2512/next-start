@@ -1,11 +1,13 @@
 import { FlexboxProps } from '@chakra-ui/react';
 import { A, D, pipe } from '@mobily/ts-belt';
-import { ChangeEvent, useState } from 'react';
+import { ChangeEvent, ReactNode, useState } from 'react';
 import { Filter, Filters } from '../components/Filter';
 
 export type UseFilterSettings = {
   filters: Filters[],
   justifyContent?: FlexboxProps["justifyContent"]
+  childrenBefore?: ReactNode
+  childrenAfter?: ReactNode
 }
 
 export const useFilter = (settings: UseFilterSettings) => {
@@ -40,17 +42,20 @@ export const useFilter = (settings: UseFilterSettings) => {
   const changeValue = (e: ChangeEvent<any>) => {
     const name = e.currentTarget.name;
     const value = e.currentTarget.value;
+    const type = e.currentTarget.type;
 
+    // add type of input
     setValue(pre => {
       return {
         ...pre,
-        [name]: Number(value) || value
+        [name]: type == "text" ? value : Number(value) || value
       };
     });
   };
 
   return {
-    Filter: <Filter filters={settings.filters}  change={changeValue} justifyContent={settings.justifyContent} values={values} />,
-    value: values
+    Filter: <Filter filters={settings.filters} change={changeValue} justifyContent={settings.justifyContent} values={values} childrenBefore={settings.childrenBefore} childrenAfter={settings.childrenAfter} />,
+    value: values,
+    setValue
   };
 };

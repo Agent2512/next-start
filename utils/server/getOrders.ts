@@ -1,4 +1,5 @@
 import { A, F, pipe } from "@mobily/ts-belt"
+import dayjs from "dayjs"
 import { Order, Prisma, Tracking } from "../../prisma/lib/saf"
 import { prismaConnect_saf } from "./prismaConnect"
 
@@ -89,4 +90,36 @@ export const makeSiteFilter = (sites: string) => {
     }
 
     return ret
+}
+
+
+export const getOrdersTest = async (splitORList: { Id: { gte: number, lte: number } }[], orderArgs?: Prisma.OrderFindManyArgs, trackingArgs?: Prisma.TrackingWhereInput) => {
+    const splitListSize = 500
+    const splitList = pipe(splitORList, A.splitEvery(splitListSize), A.map(l => F.toMutable(l)), F.toMutable)
+    const take = orderArgs?.take ?? 10
+
+
+    let data: OrderWithTracking[] = []
+    for (const list of splitList) {
+        const args = {
+            ...orderArgs,
+            where: {
+                ...orderArgs?.where,
+                OR: list
+            }
+        }
+
+        const temp = await getOrders(
+            args,
+            trackingArgs
+        )
+        data = [...data, ...temp]
+    }
+
+    return pipe(
+        data,
+        A.sort((a, b) => dayjs(b.DateCreated).diff(dayjs(a.DateCreated))),
+        A.slice(0, take),
+        F.toMutable
+    )
 }

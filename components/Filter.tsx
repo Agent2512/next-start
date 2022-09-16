@@ -1,7 +1,7 @@
 import { Button, ButtonGroup, Flex, FlexboxProps, Input, Select, Text, useColorMode } from '@chakra-ui/react';
-import { A, D, F, N, pipe } from '@mobily/ts-belt';
+import { A, D, N, pipe } from '@mobily/ts-belt';
 import { useQuery } from '@tanstack/react-query';
-import { ChangeEvent, HTMLInputTypeAttribute, useState } from 'react';
+import { ChangeEvent, HTMLInputTypeAttribute, ReactNode, useId } from 'react';
 import { useApi } from '../hooks/useApi';
 import { sitesResponse } from '../pages/api/sites';
 
@@ -12,13 +12,16 @@ interface Props {
   change: (e: ChangeEvent<any>) => void;
   values: { [key: string]: any };
   justifyContent?: FlexboxProps["justifyContent"]
+  childrenBefore?: ReactNode;
+  childrenAfter?: ReactNode;
 }
 
-export const Filter = ({ filters, change, values, justifyContent }: Props) => {
+export const Filter = ({ filters, change, values, justifyContent, childrenAfter, childrenBefore }: Props) => {
   const { colorMode } = useColorMode()
 
   return (
     <Flex borderColor={colorMode == "light" ? "black" : "white"} justifyContent={justifyContent} borderWidth={2} borderRadius={"md"} p={2} gap={2} mb={2}>
+      {childrenBefore}
       {
         A.keepMap(filters, f => {
           switch (f.type) {
@@ -29,7 +32,7 @@ export const Filter = ({ filters, change, values, justifyContent }: Props) => {
             case "Input":
               return <InputFilter key={f.key} fliter={f} change={change} value={values[f.key]} />
             case "ButtonGroup":
-              return <ButtonGroupFilter key={f.key} fliter={f} change={change} value={values[f.key]} />
+              return <ButtonGroupFilter key={useId()} fliter={f} change={change} value={values[f.key]} />
             case "Date":
               return <DateFilter key={f.key} fliter={f} change={change} value={values[f.key]} />
             case "Sites":
@@ -37,6 +40,7 @@ export const Filter = ({ filters, change, values, justifyContent }: Props) => {
           }
         })
       }
+      {childrenAfter}
     </Flex>
   );
 };
@@ -121,7 +125,7 @@ const InputFilter = (props: { fliter: InputFilter, change: (e: any) => void, val
   return (
     <Flex alignItems={"center"} gap={1} order={props.fliter.flexOrder}>
       <Text fontSize={"lg"} >{props.fliter.title || props.fliter.key}</Text>
-      <Input type={props.fliter.inputType} name={props.fliter.key} placeholder={props.fliter.placeholder} value={props.value} onChange={props.change} width="auto" borderColor={colorMode == "light" ? "black" : "white"}/>
+      <Input type={props.fliter.inputType} name={props.fliter.key} placeholder={props.fliter.placeholder} value={props.value} onChange={props.change} width="auto" borderColor={colorMode == "light" ? "black" : "white"} />
     </Flex>
   )
 }
@@ -169,7 +173,7 @@ const DateFilter = (props: { fliter: DateFilter, change: (e: any) => void, value
     <Flex alignItems={"center"} gap={1} order={props.fliter.flexOrder}>
       <Text fontSize={"lg"}>{props.fliter.title || props.fliter.key}</Text>
 
-      <Input type="date" name={props.fliter.key} value={props.value} onChange={props.change} borderColor={colorMode == "light" ? "black" : "white"}/>
+      <Input type="date" name={props.fliter.key} value={props.value} onChange={props.change} borderColor={colorMode == "light" ? "black" : "white"} />
     </Flex>
   )
 }
@@ -216,7 +220,7 @@ const SitesFilter = (props: { fliter: SitesFilter, change: (e: any) => void, val
         <option key={"other"} disabled>other</option>
         {
           isSuccess && A.map(
-            data.other, 
+            data.other,
             s => <option key={s.website} value={[s.backendid.toString(), s.siteid.toString()]}>{s.website.replace("https://www.", "")}</option>
           )
         }
