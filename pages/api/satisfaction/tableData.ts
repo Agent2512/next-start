@@ -98,9 +98,6 @@ export default async function satisfactionTableData(req: NextApiRequest, res: Ne
         F.toMutable
     )
 
-    // console.log(JSON.stringify(result, null, 2));
-    // console.log("ids", pipe(data, A.map(s => s.Id), F.toMutable));
-
     return res.json(result)
 }
 

@@ -75,13 +75,13 @@ const SatisfactionTable = () => {
                 page: 1
             }
         })
-    }, [filterValue.sites, filterValue.orderNumber, filterValue.score])
+    }, [filterValue.sites, filterValue.orderNumber, filterValue.score, QueryClient, setFilterValues])
 
     useEffect(() => {
         if (beforeDataSuccess && beforeData.length == 0 && currentPage == 1) {
             QueryClient.fetchQuery(["satisfactionTableData", "now"])
         }
-    }, [beforeData])
+    }, [beforeDataSuccess, beforeData, currentPage, QueryClient])
 
     useEffect(() => {
         const page = filterValue.page as number
@@ -99,15 +99,11 @@ const SatisfactionTable = () => {
 
         QueryClient.fetchQuery(["satisfactionTableData", "next"])
         QueryClient.fetchQuery(["satisfactionTableData", "before"])
-    }, [filterValue.page])
+    }, [filterValue.page, currentPage, nextData, beforeData, QueryClient])
 
     return (
         <Layout>
             {Filter}
-
-            {/* <pre>
-                {JSON.stringify(filterValue, null, 2)}
-            </pre> */}
 
             <TableContainer>
                 <Table variant='unstyled'>

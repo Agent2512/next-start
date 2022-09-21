@@ -86,7 +86,7 @@ const SideNavber = ({ setSize }: { setSize: Dispatch<SetStateAction<{ width: num
 
     useEffect(() => {
         size && setSize(size);
-    }, [size])
+    }, [size, setSize])
 
     useEffect(() => {
         (window as any).toggleColorMode = toggleColorMode

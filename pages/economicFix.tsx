@@ -21,8 +21,6 @@ const EconomicFix = () => {
         post<economicFixResponse>("economicFix", { orderNr })
             .then(data => {
                 setStatus(data.status)
-                console.log(data);
-
             })
     }
 

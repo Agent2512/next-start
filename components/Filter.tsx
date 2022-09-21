@@ -1,9 +1,24 @@
 import { Button, ButtonGroup, Flex, FlexboxProps, Input, Select, Text, useColorMode } from '@chakra-ui/react';
 import { A, D, N, pipe } from '@mobily/ts-belt';
 import { useQuery } from '@tanstack/react-query';
-import { ChangeEvent, HTMLInputTypeAttribute, ReactNode, useId } from 'react';
+import { ChangeEvent, HTMLInputTypeAttribute, ReactNode } from 'react';
 import { useApi } from '../hooks/useApi';
 import { sitesResponse } from '../pages/api/sites';
+
+const useKeyCollector = () => {
+  const keys: string[] = []
+
+  return (key: string) => {
+    if (keys.includes(key)) {
+      const newKey = key + "I"
+      keys.push(newKey)
+      return newKey
+    }
+
+    keys.push(key)
+    return key
+  }
+}
 
 export type Filters = SelectFilter | IncrementFilter | InputFilter | ButtonGroupFilter | DateFilter | SitesFilter
 
@@ -18,25 +33,28 @@ interface Props {
 
 export const Filter = ({ filters, change, values, justifyContent, childrenAfter, childrenBefore }: Props) => {
   const { colorMode } = useColorMode()
+  const keyCollector = useKeyCollector()
+
+
 
   return (
-    <Flex borderColor={colorMode == "light" ? "black" : "white"} justifyContent={justifyContent} borderWidth={2} borderRadius={"md"} p={2} gap={2} mb={2}>
+    <Flex borderColor={colorMode == "light" ? "black" : "white"} justifyContent={justifyContent} borderWidth={2} borderRadius={"md"} p={2} gap={2} mb={2} wrap="wrap">
       {childrenBefore}
       {
         A.keepMap(filters, f => {
           switch (f.type) {
             case "Select":
-              return <SelectFilter key={f.key} fliter={f} change={change} value={values[f.key]} />
+              return <SelectFilter key={keyCollector(f.key)} fliter={f} change={change} value={values[f.key]} />
             case "Increment":
-              return <IncrementFilter key={f.key} fliter={f} change={change} value={values[f.key]} />
+              return <IncrementFilter key={keyCollector(f.key)} fliter={f} change={change} value={values[f.key]} />
             case "Input":
-              return <InputFilter key={f.key} fliter={f} change={change} value={values[f.key]} />
+              return <InputFilter key={keyCollector(f.key)} fliter={f} change={change} value={values[f.key]} />
             case "ButtonGroup":
-              return <ButtonGroupFilter key={useId()} fliter={f} change={change} value={values[f.key]} />
+              return <ButtonGroupFilter key={keyCollector(f.key)} fliter={f} change={change} value={values[f.key]} />
             case "Date":
-              return <DateFilter key={f.key} fliter={f} change={change} value={values[f.key]} />
+              return <DateFilter key={keyCollector(f.key)} fliter={f} change={change} value={values[f.key]} />
             case "Sites":
-              return <SitesFilter key={f.key} fliter={f} change={change} value={values[f.key]} />
+              return <SitesFilter key={keyCollector(f.key)} fliter={f} change={change} value={values[f.key]} />
           }
         })
       }

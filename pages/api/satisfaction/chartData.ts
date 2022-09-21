@@ -58,25 +58,19 @@ export default async function satisfactionChartData(req: NextApiRequest, res: Ne
     if (!access) return
 
     const body = req.body as Ibody
-    console.log(body);
-
     const bodyToKey = JSON.stringify(body)
+
     if (cache[bodyToKey] && dayjs().diff(dayjs(cache[bodyToKey].timestamp), "minute") < 5) {
         return res.json(cache[bodyToKey].data)
     }
 
-
     const timePeriod = getTimePeriod(body)
     const timePeriodDays = dayjs(timePeriod.to).diff(dayjs(timePeriod.form), "days")
-    console.log(timePeriod, timePeriodDays);
 
     const allData = await prismaConnect_saf.satisfaction.findMany({
         orderBy: {
             CreatedDate: "asc"
         },
-        // include: {
-        // Order: true
-        // },
         where: {
             Order: {
                 every: {
@@ -222,11 +216,7 @@ export default async function satisfactionChartData(req: NextApiRequest, res: Ne
         data: chartData as ChartDataResponse
     }
 
-    console.log("cache", cache);
-
-
     return res.json(chartData)
-    return res.json([])
 }
 
 
@@ -242,7 +232,7 @@ const getTimePeriod = (body: Ibody): { to: Date, form: Date } => {
 
             return {
                 to: new Date(dayjs().endOf("day").format("YYYY-MM-DDTHH:mm:ss.SSS[Z]")),
-                form: new Date(dayjs().subtract(body.filter.time, "days").startOf("day").format("YYYY-MM-DDTHH:mm:ss.SSS[Z]"))
+                form: new Date(dayjs().subtract(body.filter.time - 1, "days").startOf("day").format("YYYY-MM-DDTHH:mm:ss.SSS[Z]"))
             }
         }
         else if (body.filter.time == "week") {

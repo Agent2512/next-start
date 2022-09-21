@@ -73,7 +73,7 @@ const TrackingTable = () => {
                 page: 1
             }
         })
-    }, [filterValue.sites, filterValue.orderNumber, filterValue.trackingNumberOrReference])
+    }, [filterValue.sites, filterValue.orderNumber, filterValue.trackingNumberOrReference, QueryClient, setFilterValues])
 
 
     useEffect(() => {
@@ -92,13 +92,13 @@ const TrackingTable = () => {
 
         QueryClient.fetchQuery(["trackingTableData", "next"])
         QueryClient.fetchQuery(["trackingTableData", "before"])
-    }, [filterValue.page])
+    }, [filterValue.page, currentPage, nextData, beforeData, QueryClient])
 
     useEffect(() => {
         if (beforeDataSuccess && beforeData.length == 0 && currentPage == 1) {
             QueryClient.fetchQuery(["trackingTableData", "now"])
         }
-    }, [beforeData])
+    }, [beforeDataSuccess, beforeData, currentPage, QueryClient])
 
     return (
         <Layout>

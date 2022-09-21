@@ -30,10 +30,6 @@ export default NextAuth({
             async authorize(credentials) {
                 const email = credentials?.email
                 const password = credentials?.password
-                console.log(credentials);
-
-                console.log(email, password);
-
 
                 if (!email || !password) return null
 

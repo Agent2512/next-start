@@ -1,11 +1,10 @@
-import { Flex, Grid, GridItem, useColorMode } from "@chakra-ui/react"
-import { useSize } from "@chakra-ui/react-use-size"
+import { Box, Flex, Grid, GridItem, Text, useColorMode } from "@chakra-ui/react"
 import { A, D } from "@mobily/ts-belt"
 import { useQuery } from "@tanstack/react-query"
 import type { ApexOptions } from 'apexcharts'
 import dayjs from "dayjs"
 import dynamic from "next/dynamic"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 import Layout from "../../components/layout"
 import { useApi } from "../../hooks/useApi"
 import { useFilter } from "../../hooks/useFilter"
@@ -20,7 +19,6 @@ const Chart = dynamic(() => import("react-apexcharts"),
 const chartOptions: ApexOptions = {
     chart: {
         type: 'line',
-        width: 1650,
         toolbar: {
 
         },
@@ -52,30 +50,10 @@ const chartOptions: ApexOptions = {
         enabled: true,
     },
     stroke: {
-        width: [6, 8, 3, 2, 2, 2, 2, 2, 2, 2],
+        // width: [6, 8, 3, 2, 2, 2, 2, 2, 2, 2],
         curve: 'straight',
     },
 }
-
-const testdata: ApexAxisChartSeries = [
-    {
-        name: "loading data or error",
-        data: [
-            {
-                x: 0,
-                y: 0
-            },
-            {
-                x: 1,
-                y: 1.5
-            },
-            {
-                x: 2,
-                y: 0
-            }
-        ]
-    }
-]
 
 const mapChartData = (data: ChartDataResponse[], key: keyof ChartDataResponse) => {
     return A.map(data, item => {
@@ -97,22 +75,26 @@ const SatisfactionChart = () => {
             {
                 type: "ButtonGroup",
                 key: "time",
-                title: "Last",
-                buttonTexts: ["7 days", "30 days", "3 months"],
-                buttonValues: [7, 30, 90],
-            },
-            {
-                type: "ButtonGroup",
-                key: "time",
                 title: "Current",
                 buttonTexts: ["week", "month", "quarter", "year"],
                 buttonValues: ["week", "month", "quarter", "year"],
             },
             {
+                type: "ButtonGroup",
+                key: "time",
+                title: "Last",
+                buttonTexts: ["7 days", "30 days", "3 months"],
+                buttonValues: [
+                    7,
+                    30,
+                    dayjs().diff(dayjs().subtract(3, "months"), "days")
+                ],
+            },
+            {
                 type: "Date",
                 key: "from",
                 title: "From",
-                defaultValue: dayjs().subtract(7, "days").format("YYYY-MM-DD"),
+                defaultValue: dayjs().subtract(6, "days").format("YYYY-MM-DD"),
             },
             {
                 type: "Date",
@@ -123,12 +105,8 @@ const SatisfactionChart = () => {
         ],
 
     })
-    const { colorMode } = useColorMode()
     const [dateFocus, setDateFocus] = useState<"time" | "from-to">("time")
-    const [filterState, setFilterState] = useState(filterValue)
     const { post } = useApi("/api/satisfaction/")
-    const ChartBoxRef = useRef<HTMLDivElement>(null)
-    const ChartBoxDim = useSize(ChartBoxRef)
     const { data, isSuccess } = useQuery(
         [
             "satisfactionTableData",
@@ -141,7 +119,6 @@ const SatisfactionChart = () => {
         ],
         () => post<ChartDataResponse[]>("chartData", { filter: filterValue, dateFocus }),
     )
-    const [chartData, setChartData] = useState<ApexAxisChartSeries>(testdata)
 
     useEffect(() => {
         const inputs = document.getElementsByClassName("chakra-input")
@@ -163,93 +140,14 @@ const SatisfactionChart = () => {
         })
     }, [])
 
-    useEffect(() => {
-        if (data == undefined) return
-
-        const newChartData: ApexAxisChartSeries = [
-            {
-                name: "Sent today",
-                data: mapChartData(data, "sent"),
-                type: "area",
-                color: "#44f"
-            },
-            {
-                name: "Sent today: Answered",
-                data: mapChartData(data, "sentWithAnswered"),
-                type: "line",
-                color: "#4f4",
-            },
-            {
-                name: "Sent today: Average score",
-                data: mapChartData(data, "sentScoresAvg"),
-                type: "line",
-                color: "#f44",
-            },
-            {
-                name: "Sent today: TP sent",
-                data: mapChartData(data, "sentWithSentTP"),
-                type: "line",
-                color: "#4ff",
-            },
-            {
-                name: "Sent today: TP answered",
-                data: mapChartData(data, "sentWithSentTPWithAnswered"),
-                type: "line",
-                color: "#f4f",
-            },
-
-
-            {
-                name: "TP sent today",
-                data: mapChartData(data, "sentTP"),
-                type: "line",
-                color: "#f94",
-            },
-            {
-                name: "TP sent today: Answered",
-                data: mapChartData(data, "sentTPWithAnswered"),
-                type: "line",
-                color: "#FA5935",
-            },
-
-
-            {
-                name: "Answered today",
-                data: mapChartData(data, "answered"),
-                type: "line",
-                color: "#AC0FD2"
-            },
-            {
-                name: "Answered today: Average score",
-                data: mapChartData(data, "answeredScoresAvg"),
-                type: "line",
-                color: "#473910"
-            },
-            {
-                name: "TP answered today",
-                data: mapChartData(data, "answeredTP"),
-                type: "line",
-                color: "#1F2F49"
-            },
-        ]
-
-        setChartData(newChartData)
-    }, [data])
-
     return (
         <Layout>
             {Filter}
 
             <Flex w={"full"}>
                 <Grid w={"full"} templateColumns={"14fr 1fr"} gap={2}>
-                    <GridItem ref={ChartBoxRef} borderColor={colorMode == "light" ? "black" : "white"} borderWidth={1} p={2}>
-                        <Chart
-                            options={chartOptions}
-                            series={chartData}
-                            height={"500"}
-                        />
-                    </GridItem>
-                    {/* <GridItem bg="red">test</GridItem> */}
+                    <MyChart key={1} data={data || undefined} dataKeys={["sent", "sentWithAnswered", "sentScoresAvg", "sentWithSentTP", "sentWithSentTPWithAnswered"]} />
+                    <MyChart key={2} data={data || undefined} dataKeys={["sentTP", "sentTPWithAnswered", "answered", "answeredScoresAvg", "answeredTP"]} />
                 </Grid>
             </Flex>
         </Layout>
@@ -259,3 +157,122 @@ const SatisfactionChart = () => {
 SatisfactionChart.auth = true
 
 export default SatisfactionChart
+
+interface Props {
+    data: ChartDataResponse[] | undefined
+    dataKeys: (keyof ChartDataResponse)[]
+}
+
+const MyChart = ({ data, dataKeys }: Props) => {
+    const { colorMode } = useColorMode()
+    const [chartData, setChartData] = useState<ApexAxisChartSeries>([])
+
+    useEffect(() => {
+        if (data == undefined) return
+
+        let newChartData: ApexAxisChartSeries = []
+
+        if (dataKeys.includes("sent")) newChartData.push({
+            name: "Sent today",
+            data: mapChartData(data, "sent"),
+            type: "area",
+            color: "#44f"
+        })
+
+        if (dataKeys.includes("sentWithAnswered")) newChartData.push({
+            name: "Sent today: Answered",
+            data: mapChartData(data, "sentWithAnswered"),
+            type: "line",
+            color: "#4f4",
+        })
+
+        if (dataKeys.includes("sentScoresAvg")) newChartData.push({
+            name: "Sent today: Average score",
+            data: mapChartData(data, "sentScoresAvg"),
+            type: "line",
+            color: "#f44",
+        })
+
+        if (dataKeys.includes("sentWithSentTP")) newChartData.push({
+            name: "Sent today: TP sent",
+            data: mapChartData(data, "sentWithSentTP"),
+            type: "line",
+            color: "#4ff",
+        })
+
+        if (dataKeys.includes("sentWithSentTPWithAnswered")) newChartData.push({
+            name: "Sent today: TP answered",
+            data: mapChartData(data, "sentWithSentTPWithAnswered"),
+            type: "line",
+            color: "#f4f",
+        })
+
+        if (dataKeys.includes("sentTP")) newChartData.push({
+            name: "TP sent today",
+            data: mapChartData(data, "sentTP"),
+            type: "line",
+            color: "#f94",
+        })
+
+        if (dataKeys.includes("sentTPWithAnswered")) newChartData.push({
+            name: "TP sent today: Answered",
+            data: mapChartData(data, "sentTPWithAnswered"),
+            type: "line",
+            color: "#FA5935",
+        })
+
+        if (dataKeys.includes("answeredTP")) newChartData.push({
+            name: "TP answered today",
+            data: mapChartData(data, "answeredTP"),
+            type: "line",
+            color: "#1F2F49"
+        })
+
+        if (dataKeys.includes("answered")) newChartData.push({
+            name: "Answered today",
+            data: mapChartData(data, "answered"),
+            type: "line",
+            color: "#AC0FD2"
+        })
+
+        if (dataKeys.includes("answeredScoresAvg")) newChartData.push({
+            name: "Answered today: Average score",
+            data: mapChartData(data, "answeredScoresAvg"),
+            type: "line",
+            color: "#473910"
+        })
+
+        setChartData(newChartData)
+    }, [data, dataKeys])
+
+    return (
+        <>
+            <GridItem borderColor={colorMode == "light" ? "black" : "white"} borderWidth={1} p={2}>
+                <Chart
+                    options={chartOptions}
+                    series={chartData}
+                    height={"350"}
+                />
+            </GridItem>
+            <Flex borderColor={colorMode == "light" ? "black" : "white"} borderWidth={1} flexDir="column" gap={5}>
+                <Text textAlign={"center"}>data average</Text>
+
+                <Flex flexDir="column" justifyContent="center" alignItems="center" gap={5}>
+                    {A.map(chartData, (row) => {
+                        const yArray = (row.data as { x: string, y: number }[]).map(t => t.y)
+                        const avg = A.reduce(yArray, 0, (a, b) => Number(a) + Number(b)) / yArray.length
+
+                        return (
+                            <Flex key={row.name} flexDir="column" alignItems="center">
+                                <Box w={"15px"} h={"15px"} borderRadius={"md"} bg={row.color} />
+                                <Text>
+                                    {avg.toFixed(2)}
+                                </Text>
+                            </Flex>
+                        )
+                    })}
+                </Flex>
+            </Flex>
+        </>
+    )
+}

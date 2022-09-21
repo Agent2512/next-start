@@ -89,7 +89,6 @@ const FeedControlBtn = (props: Props) => {
             return;
         const isBefore = dayjs().isBefore(dayjs(props.feed.feedUpdate[0].updateDone));
 
-        // console.log("test", props.feed.id, props.feed.feedUpdate[0]);
         setIsUpdateDone(isBefore);
     }, [props.feed])
 

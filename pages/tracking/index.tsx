@@ -1,4 +1,4 @@
-import { Flex, Heading, Stack, Text, useColorMode } from "@chakra-ui/react";
+import { Flex, Heading, Text, useColorMode } from "@chakra-ui/react";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { useQuery } from "@tanstack/react-query";
 import Layout from "../../components/layout";
@@ -40,17 +40,17 @@ const Trackingindex = () => {
 
             <Flex gap={2} justifyContent="center" ref={Animate}>
                 <TrackingCard
-                    key={"inCustoms"}
-                    title={"InCustoms"}
-                    low={inCustomsSuccess ? inCustoms.ordersInCustoms : 0}
-                    high={inCustomsSuccess ? inCustoms.orders : 0}
-                />
-
-                <TrackingCard
                     key={"missingTracking"}
                     title={"missingTracking"}
                     low={missingTrackingSuccess ? missingTracking.ordersWithOutTracking : 0}
                     high={missingTrackingSuccess ? missingTracking.orders : 0}
+                />
+
+                <TrackingCard
+                    key={"inCustoms"}
+                    title={"InCustoms"}
+                    low={inCustomsSuccess ? inCustoms.ordersInCustoms : 0}
+                    high={inCustomsSuccess ? inCustoms.orders : 0}
                 />
 
                 <TrackingCard
