@@ -1,18 +1,18 @@
 import { A, F, pipe } from "@mobily/ts-belt"
 import { NextApiRequest, NextApiResponse } from "next"
+import { User } from "next-auth"
 import { getSession } from "next-auth/react"
-import { SatisfactionState, User } from "../../../prisma/lib/main"
-import { Satisfaction } from "../../../prisma/lib/saf"
+import { SatisfactionState } from "../../../prisma/lib/main"
+import { Tracking } from "../../../prisma/lib/saf"
 import { hasAccess } from "../../../utils/server/hasAccess"
 import { prismaConnect, prismaConnect_saf } from "../../../utils/server/prismaConnect"
 
-export default async function followSatisfaction(req: NextApiRequest, res: NextApiResponse) {
+export default async function followTracking(req: NextApiRequest, res: NextApiResponse) {
     const access = await hasAccess(req, res, ["followTable"])
     if (!access) return
 
     const body = req.body
     const userScope = req.body.userScope as string
-
 
     let userEmail: undefined | string = undefined
 
@@ -26,7 +26,7 @@ export default async function followSatisfaction(req: NextApiRequest, res: NextA
         userEmail = session.user.email
     }
 
-    const satisfactionStates = await prismaConnect.satisfactionState.findMany({
+    const trackingStates = await prismaConnect.trackingState.findMany({
         where: {
             state: body.status == "ALL" ? undefined : body.status,
             userEmail
@@ -45,10 +45,10 @@ export default async function followSatisfaction(req: NextApiRequest, res: NextA
         }
     })
 
-    const data = await prismaConnect_saf.satisfaction.findMany({
+    const data = await prismaConnect_saf.tracking.findMany({
         where: {
             Id: {
-                in: pipe(satisfactionStates, A.map((x) => x.id), F.toMutable)
+                in: pipe(trackingStates, A.map((x) => x.id), F.toMutable)
             },
         }
     })
@@ -56,7 +56,7 @@ export default async function followSatisfaction(req: NextApiRequest, res: NextA
     const dataAndStates = pipe(
         data,
         A.map(x => {
-            const state = A.find(satisfactionStates, (y) => y.id === x.Id)
+            const state = A.find(trackingStates, (y) => y.id === x.Id)
             return {
                 ...x,
                 state
@@ -68,7 +68,7 @@ export default async function followSatisfaction(req: NextApiRequest, res: NextA
     return res.json(dataAndStates)
 }
 
-export type followSatisfactionResponse = Satisfaction & {
+export type followTrackingResponse = Tracking & {
     state: SatisfactionState & {
         user: User
     }

@@ -1,11 +1,13 @@
 import { Button, Flex, Grid, Table, TableContainer, Tbody, Td, Text, Th, Thead, Tr, useColorMode } from "@chakra-ui/react";
 import { A, flow, pipe, S } from "@mobily/ts-belt";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
+import { Session } from "next-auth";
 import Layout from "../components/layout";
 import { useApi } from "../hooks/useApi";
 import { useFilter } from "../hooks/useFilter";
 import { followSatisfactionResponse } from "./api/follow/followSatisfaction";
+import { followTrackingResponse } from "./api/follow/followTracking";
 
 const wordSplit = flow(
     S.split(" "),
@@ -17,7 +19,7 @@ const wordSplit = flow(
     })
 )
 
-const followTable = () => {
+const FollowTable = () => {
     const { Filter, value: filterValue } = useFilter({
         justifyContent: "center",
         filters: [
@@ -29,15 +31,13 @@ const followTable = () => {
                 buttonValues: ["ALL", "FOLLOW", "HAS-FOLLOW", "FOLLOW-DONE"],
             },
             {
-                type: "Sites",
-                key: "sites",
-            },
-            // {
-            //     type: "Increment",
-            //     key: "page",
-            //     defaultValue: 1,
-            //     min: 1
-            // }
+                type: "ButtonGroup",
+                key: "userScope",
+                title: "User scope",
+                buttonTexts: ["all", "only you"],
+                buttonValues: ["ALL", "ME"],
+
+            }
         ]
     })
 
@@ -53,15 +53,70 @@ const followTable = () => {
     )
 }
 
-followTable.auth = true;
+FollowTable.auth = true;
 
-export default followTable;
+export default FollowTable;
+
+const FollowButtonController = ({ id, state, api }: { id: number, state: any, api: "satisfaction" | "tracking" }) => {
+    const { get: authGet } = useApi("/api/auth/")
+    const { data: session, isSuccess } = useQuery(["session"], () => authGet<Session>("session"))
+    const { post } = useApi(`/api/${api}/options/`)
+    const { mutate: addMutate } = useMutation(({ trackingId }: { trackingId: number }) => post("addFollow", { id: trackingId }))
+    const { mutate: takeMutate } = useMutation(({ trackingId }: { trackingId: number }) => post("takeFollow", { id: trackingId }))
+    const { mutate: doneMutate } = useMutation(({ trackingId }: { trackingId: number }) => post("doneFollow", { id: trackingId }))
+    const queryClient = useQueryClient()
+
+
+    const addToFollow = () => {
+        addMutate({ trackingId: id }, {
+            onSuccess: () => {
+                queryClient.invalidateQueries(["follow"])
+            }
+        })
+    }
+
+    const takeFollow = () => {
+        takeMutate({ trackingId: id }, {
+            onSuccess: () => {
+                queryClient.invalidateQueries(["follow"])
+            }
+        })
+    }
+
+    const doneFollow = () => {
+        doneMutate({ trackingId: id }, {
+            onSuccess: () => {
+                queryClient.invalidateQueries(["follow"])
+            }
+        })
+    }
+
+    if (!state) return <Button colorScheme={"messenger"} onClick={addToFollow}>Add follow up</Button>
+    else if (state.state == "FOLLOW") return <Button colorScheme={"green"} onClick={takeFollow}>Follow</Button>
+    else if (state.state == "HAS-FOLLOW" && state.user == null) return <Button colorScheme={"green"} onClick={takeFollow}>Follow</Button>
+    else if (isSuccess && state.state == "HAS-FOLLOW" && state.user?.email == session.user.email) return <Button colorScheme={"cyan"} onClick={doneFollow}>say follow up is done</Button>
+    else if (state.state == "HAS-FOLLOW" && state.user) return <Text textAlign={"center"}>Order has follow by<br /><Text fontWeight={"bold"} as="span">{state.user.name} - {state.user.email}</Text></Text>
+    else if (state.state == "FOLLOW-DONE" && state.user == null) return (
+        <Flex gap={4}>
+            <Text>follow up has been done</Text>
+            <Button colorScheme={"green"} onClick={takeFollow}>Follow</Button>
+        </Flex>
+    )
+    else if (state.state == "FOLLOW-DONE" && state.user != null) return (
+        <Flex gap={4}>
+            <Text textAlign={"center"}>follow up has been done by<br /><Text fontWeight={"bold"} as="span">{state.user.name} - {state.user.email}</Text></Text>
+            <Button colorScheme={"green"} onClick={takeFollow}>Follow</Button>
+        </Flex>
+    )
+
+    return <></>
+}
 
 
 const TableOfSatisfaction = ({ filterValue }: { filterValue: ReturnType<typeof useFilter>["value"] }) => {
     const { colorMode } = useColorMode()
     const { post } = useApi("/api/follow/")
-    const { data, isSuccess } = useQuery(["followSatisfaction", filterValue], () => post<followSatisfactionResponse[]>("followSatisfaction", filterValue))
+    const { data, isSuccess } = useQuery(["follow", "followSatisfaction", filterValue], () => post<followSatisfactionResponse[]>("followSatisfaction", filterValue))
 
 
     return (
@@ -79,27 +134,18 @@ const TableOfSatisfaction = ({ filterValue }: { filterValue: ReturnType<typeof u
                         </Tr>
                     </Thead>
                     <Tbody>
-                        <Tr>
-                            <Td>YNO38DYY</Td>
-                            <Td>RE2245820</Td>
-                            <Td>14:20 21/09/2022</Td>
-                            <Td>{wordSplit("The parcel is expected to be delivered during the day.")}</Td>
-                            <Td>
-                                <Button>follow</Button>
-                            </Td>
-                        </Tr>
                         {
                             isSuccess && pipe(
                                 data,
                                 A.map((item) => {
                                     return (
-                                        <Tr>
+                                        <Tr key={item.Id}>
                                             <Td>{item.Id}</Td>
                                             <Td>{item.Score}</Td>
                                             <Td>{dayjs(item.SatisfactionAnswered).format("HH:mm DD/MM/YYYY")}</Td>
                                             <Td>{wordSplit(item.Comment || "no comment")}</Td>
                                             <Td>
-                                                <Button>follow</Button>
+                                                <FollowButtonController id={item.Id} state={item.state} api={"satisfaction"} />
                                             </Td>
                                         </Tr>
                                     )
@@ -115,6 +161,8 @@ const TableOfSatisfaction = ({ filterValue }: { filterValue: ReturnType<typeof u
 
 const TableOfTracking = ({ filterValue }: { filterValue: ReturnType<typeof useFilter>["value"] }) => {
     const { colorMode } = useColorMode()
+    const { post } = useApi("/api/follow/")
+    const { data, isSuccess } = useQuery(["follow", "followTracking", filterValue], () => post<followTrackingResponse[]>("followTracking", filterValue))
 
     return (
         <Flex flexDir={"column"} gap={1}>
@@ -131,15 +179,24 @@ const TableOfTracking = ({ filterValue }: { filterValue: ReturnType<typeof useFi
                         </Tr>
                     </Thead>
                     <Tbody>
-                        <Tr>
-                            <Td>YNO38DYY</Td>
-                            <Td>RE2245820</Td>
-                            <Td>{wordSplit("The parcel is expected to be delivered during the day.")}</Td>
-                            <Td>14:20 21/09/2022</Td>
-                            <Td>
-                                <Button>follow</Button>
-                            </Td>
-                        </Tr>
+                        {
+                            isSuccess && pipe(
+                                data,
+                                A.map((item) => {
+                                    return (
+                                        <Tr key={item.Id}>
+                                            <Td>{item.Tracking || "not set yet"}</Td>
+                                            <Td>{item.Reference || "-"}</Td>
+                                            <Td>{wordSplit(item.ServiceStatus || "not set yet")}</Td>
+                                            <Td>{item.StatusUpdate ? dayjs(item.StatusUpdate).format("HH:mm DD/MM/YYYY") : "not set yet"}</Td>
+                                            <Td>
+                                                <FollowButtonController id={item.Id} state={item.state} api={"tracking"} />
+                                            </Td>
+                                        </Tr>
+                                    )
+                                })
+                            )
+                        }
 
                     </Tbody>
                 </Table>

@@ -1,6 +1,6 @@
 import { ArrowForwardIcon } from "@chakra-ui/icons"
 import { Button, Flex, Table, TableContainer, Tbody, Td, Text, Th, Thead, Tr, useBoolean, useColorMode } from "@chakra-ui/react"
-import { A, N, Option } from "@mobily/ts-belt"
+import { A, N, Option, pipe } from "@mobily/ts-belt"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import dayjs from "dayjs"
 import { Session } from "next-auth"
@@ -61,11 +61,22 @@ const TrackingTable = () => {
         getNext
     )
 
+    const { data: trackingStates } = useQuery(
+        ["trackingStates"],
+        () => post<trackingStatesResponse[]>("tableDataRowStates", {
+            ids: pipe(tableData, A.map(o => o.trackings), A.flat, A.map(t => t.Id))
+        }),
+        {
+            enabled: tableData.length > 0,
+            initialData: []
+        }
+    )
 
     useEffect(() => {
         QueryClient.fetchQuery(["trackingTableData", "before"])
         QueryClient.fetchQuery(["trackingTableData", "now"])
         QueryClient.fetchQuery(["trackingTableData", "next"])
+        QueryClient.fetchQuery(["tableDataRowStates"])
 
         setFilterValues(pre => {
             return {
@@ -92,6 +103,7 @@ const TrackingTable = () => {
 
         QueryClient.fetchQuery(["trackingTableData", "next"])
         QueryClient.fetchQuery(["trackingTableData", "before"])
+        QueryClient.fetchQuery(["tableDataRowStates"])
     }, [filterValue.page, currentPage, nextData, beforeData, QueryClient])
 
     useEffect(() => {
@@ -117,7 +129,7 @@ const TrackingTable = () => {
                     </Thead>
 
                     <Tbody>
-                        {tableDataSuccess && A.map(tableData, order => <Row key={order.Id} order={order} trackingStates={[]} />)}
+                        {tableDataSuccess && A.map(tableData, order => <Row key={order.Id} order={order} trackingStates={trackingStates} />)}
                     </Tbody>
                 </Table>
             </TableContainer>
@@ -161,7 +173,7 @@ const Row = ({ order, trackingStates }: { order: TrackingTableDataResponse, trac
                             </Td>
 
                             <Td>
-                                Last update<br />{dayjs(v.StatusUpdate).format("HH:mm DD/MM/YYYY") || "not set yet"}
+                                Last update<br />{v.StatusUpdate ? dayjs(v.StatusUpdate).format("HH:mm DD/MM/YYYY") : "not set yet"}
                             </Td>
                             <Td display={"flex"} flexDir="row-reverse">
                                 <FollowButtonController
